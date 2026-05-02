@@ -1,0 +1,20 @@
+
+# Hello World in seng!
+# This is a comment
+
+say "Hello, World!"
+say "Welcome to seng — Simple English Programming Language!"
+
+set name to "Alice"
+set age to 25
+
+say "Name: " + name
+say "Age: " + age
+
+if age is greater than 18 then
+    say "You are an adult."
+else
+    say "You are a minor."
+end
+
+say "Done!"

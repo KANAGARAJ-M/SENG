@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>seng — Simple English Programming Language</title>
+  <meta name="description" content="seng is an open-source programming language where you write code in plain English. Created by NoCorps.org build by KANAGARAJ-M." />
+  <meta name="author" content="NoCorps.org build by KANAGARAJ-M" />
+  <meta property="og:title" content="seng — Simple English Programming Language" />
+  <meta property="og:description" content="Write code in plain English. No symbols, no complex syntax. Created by NoCorps.org build by KANAGARAJ-M." />
+  <meta property="og:url" content="https://nocorps.org/seng" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://nocorps.org/seng/logo.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="seng — Simple English Programming Language" />
+  <meta name="twitter:description" content="Write code in plain English. No symbols, no complex syntax." />
+  <meta name="twitter:image" content="https://nocorps.org/seng/logo.png" />
+  <meta name="keywords" content="seng, simple english programming language, beginner programming, easy coding, english programming language, NoCorps.org build by KANAGARAJ-M, learn to code, natural language programming" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://nocorps.org/seng" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "seng",
+    "description": "seng (Simple English) is a programming language where you write code in plain English. No symbols, no complex syntax.",
+    "url": "https://nocorps.org/seng",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Windows",
+    "version": "1.0.0",
+    "author": { "@type": "Person", "name": "NoCorps.org build by KANAGARAJ-M", "url": "https://nocorps.org" },
+    "license": "https://nocorps.org/seng/LICENSE",
+    "downloadUrl": "https://nocorps.org/seng/downloads/seng-setup-1.0.0-windows-x64.exe",
+    "softwareVersion": "1.0.0",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #080c14;
+      --bg2:        #0d1220;
+      --bg3:        #111827;
+      --surface:    #161d2e;
+      --border:     #1e2d48;
+      --accent:     #38bdf8;
+      --accent2:    #818cf8;
+      --accent3:    #34d399;
+      --text:       #e2e8f0;
+      --text-dim:   #94a3b8;
+      --text-faint: #475569;
+      --red:        #f87171;
+      --yellow:     #fbbf24;
+      --green:      #34d399;
+      --purple:     #c084fc;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── scrollbar ──────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── animations ─────────────────────────────── */
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes glow     { 0%,100% { text-shadow: 0 0 20px #38bdf8aa; } 50% { text-shadow: 0 0 40px #38bdf8ff, 0 0 80px #38bdf844; } }
+    @keyframes pulse    { 0%,100% { opacity:.6; } 50% { opacity:1; } }
+    @keyframes float    { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    @keyframes spin     { to { transform: rotate(360deg); } }
+    @keyframes slideIn  { from { opacity:0; transform: translateX(-20px); } to { opacity:1; transform: translateX(0); } }
+    @keyframes blink    { 0%,100% { opacity:1; } 50% { opacity:0; } }
+
+    /* ── nav ─────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      background: rgba(8,12,20,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .nav-brand {
+      font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px;
+      color: var(--accent);
+      animation: glow 3s ease-in-out infinite;
+    }
+    .nav-brand span { color: var(--text-dim); font-weight: 300; font-size: 1rem; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: var(--text-dim); text-decoration: none; font-size: .9rem;
+      font-weight: 500; transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-cta {
+      background: var(--accent); color: #000 !important;
+      padding: .4rem 1.1rem; border-radius: 6px; font-weight: 700 !important;
+    }
+    .nav-cta:hover { background: #7dd3fc !important; color: #000 !important; }
+
+    /* ── platform banner ────────────────── */
+    .platform-banner {
+      background: linear-gradient(135deg, #1e1b4b, #0f172a);
+      border-bottom: 1px solid #312e81;
+      text-align: center; padding: .55rem 1rem;
+      font-size: .78rem; color: #a5b4fc;
+      position: fixed; top: 64px; width: 100%; z-index: 99;
+      display: flex; align-items: center; justify-content: center; gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .platform-banner .win-badge {
+      background: #1d4ed8; color: #fff;
+      padding: .15rem .6rem; border-radius: 999px;
+      font-weight: 700; font-size: .72rem;
+    }
+    .platform-banner .soon-badge {
+      background: #374151; color: #9ca3af;
+      padding: .15rem .6rem; border-radius: 999px;
+      font-weight: 600; font-size: .72rem;
+    }
+
+    /* ── download modal ─────────────────────────── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 999;
+      background: rgba(0,0,0,.75); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 16px; width: min(680px, 94vw);
+      max-height: 88vh; display: flex; flex-direction: column;
+      overflow: hidden; box-shadow: 0 32px 80px #000c;
+    }
+    .modal-head {
+      padding: 1.5rem 1.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-head h2 { font-size: 1.15rem; font-weight: 800; }
+    .modal-close {
+      background: none; border: none; color: var(--text-dim);
+      font-size: 1.5rem; cursor: pointer; line-height: 1;
+      transition: color .2s;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { padding: 1.25rem 1.75rem; overflow-y: auto; flex: 1; }
+    .license-box {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .74rem; line-height: 1.7; color: var(--text-dim);
+      max-height: 280px; overflow-y: auto; white-space: pre-wrap;
+    }
+    .modal-accept {
+      display: flex; align-items: center; gap: .75rem;
+      margin-top: 1.25rem; padding: 1rem;
+      background: var(--surface); border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .modal-accept input[type=checkbox] {
+      width: 18px; height: 18px; accent-color: var(--accent);
+      cursor: pointer; flex-shrink: 0;
+    }
+    .modal-accept label { font-size: .88rem; cursor: pointer; }
+    .modal-foot {
+      padding: 1rem 1.75rem 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex; gap: .75rem; justify-content: flex-end;
+    }
+    #btn-download {
+      background: var(--accent); color: #000;
+      border: none; border-radius: 8px;
+      padding: .75rem 2rem; font-weight: 800; font-size: .95rem;
+      cursor: pointer; transition: all .2s;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    #btn-download:disabled {
+      background: var(--border); color: var(--text-faint);
+      cursor: not-allowed;
+    }
+    #btn-download:not(:disabled):hover { background: #7dd3fc; }
+    .dl-progress {
+      display: none; align-items: center; gap: .5rem;
+      font-size: .85rem; color: var(--green);
+    }
+    .dl-progress.show { display: flex; }
+    @keyframes dlSpin { to { transform: rotate(360deg); } }
+    .dl-spin { width: 16px; height: 16px; border: 2px solid var(--green);
+      border-top-color: transparent; border-radius: 50%;
+      animation: dlSpin .7s linear infinite; }
+
+    /* ── roadmap ─────────────────────────────────── */
+    .roadmap-phases { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px,1fr)); gap: 1.5rem; margin-top: 2.5rem; }
+    .phase-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 1.75rem; transition: transform .3s, box-shadow .3s; }
+    .phase-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,.4); }
+    .phase-current { border-color: var(--accent) !important; box-shadow: 0 0 0 1px var(--accent), 0 8px 32px rgba(56,189,248,.1); }
+    .phase-tag { display:inline-flex; align-items:center; gap:.4rem; font-size:.7rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; border-radius:999px; padding:.25rem .75rem; margin-bottom:1rem; }
+    .tag-done   { background:rgba(52,211,153,.15);  color:var(--green);   border:1px solid rgba(52,211,153,.3); }
+    .tag-next   { background:rgba(129,140,248,.15); color:var(--accent2); border:1px solid rgba(129,140,248,.3); }
+    .tag-soon   { background:rgba(192,132,252,.15); color:#c084fc;        border:1px solid rgba(192,132,252,.3); }
+    .tag-future { background:rgba(251,191,36,.15);  color:var(--yellow);  border:1px solid rgba(251,191,36,.3); }
+    .phase-ver  { font-size:1.4rem; font-weight:900; margin-bottom:.3rem; }
+    .phase-name { font-size:.85rem; color:var(--text-dim); margin-bottom:1.25rem; }
+    .phase-items { list-style:none; display:flex; flex-direction:column; gap:.5rem; }
+    .phase-items li { display:flex; align-items:flex-start; gap:.6rem; font-size:.875rem; color:var(--text-dim); }
+    .phase-items li.done { color:var(--green); }
+    .phase-items li.done::before { content:'✓'; flex-shrink:0; }
+    .phase-items li.todo { padding-left:.1rem; }
+    .phase-items li.todo::before { content:'◦'; flex-shrink:0; color:var(--text-faint); }
+
+    /* ── hero ────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; text-align: center;
+      padding: 8rem 2rem 4rem;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 30%, #1e3a5f44, transparent),
+                  radial-gradient(ellipse 40% 40% at 80% 80%, #312e8133, transparent);
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 999px; padding: .35rem 1rem;
+      font-size: .78rem; font-weight: 600; color: var(--accent);
+      margin-bottom: 1.5rem;
+      animation: fadeUp .6s ease both;
+    }
+    .hero-badge .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s ease infinite;
+    }
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      font-weight: 900; letter-spacing: -3px;
+      line-height: 1;
+      color: var(--text);
+      animation: fadeUp .7s .1s ease both;
+    }
+    .hero h1 .accent { color: var(--accent); animation: glow 3s ease infinite; }
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: var(--text-dim); max-width: 560px;
+      margin: 1.5rem auto 0;
+      animation: fadeUp .8s .2s ease both;
+    }
+    .hero-buttons {
+      display: flex; gap: 1rem; margin-top: 2.5rem; flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp .9s .3s ease both;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .8rem 1.8rem; border-radius: 8px;
+      font-weight: 700; font-size: .95rem;
+      text-decoration: none; cursor: pointer; border: none;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary {
+      background: var(--accent); color: #000;
+      box-shadow: 0 4px 24px #38bdf844;
+    }
+    .btn-primary:hover { box-shadow: 0 8px 32px #38bdf866; }
+    .btn-outline {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .hero-stats {
+      display: flex; gap: 3rem; margin-top: 4rem; flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp 1s .4s ease both;
+    }
+    .stat { text-align: center; }
+    .stat-num { font-size: 2rem; font-weight: 800; color: var(--accent); }
+    .stat-label { font-size: .8rem; color: var(--text-dim); }
+
+    /* ── code terminal ───────────────────────────── */
+    .terminal-wrap {
+      position: relative; margin-top: 5rem;
+      animation: fadeUp 1s .5s ease both;
+      max-width: 700px; width: 100%;
+    }
+    .terminal {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+      box-shadow: 0 24px 80px #000a, 0 0 0 1px #38bdf822;
+    }
+    .terminal-bar {
+      background: var(--surface);
+      display: flex; align-items: center; gap: .45rem;
+      padding: .75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .t-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .t-dot-r { background: #ff5f57; }
+    .t-dot-y { background: #febc2e; }
+    .t-dot-g { background: #28c840; }
+    .t-title { font-size: .78rem; color: var(--text-faint); margin-left: .5rem; font-family: 'JetBrains Mono', monospace; }
+    .terminal-body { padding: 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: .9rem; line-height: 1.8; }
+    .t-comment { color: #475569; }
+    .t-kw     { color: #818cf8; font-weight: 700; }
+    .t-str    { color: #34d399; }
+    .t-num    { color: #fb923c; }
+    .t-fn     { color: #38bdf8; }
+    .t-op     { color: #c084fc; }
+    .t-var    { color: #e2e8f0; }
+    .t-cursor {
+      display: inline-block; width: 9px; height: 1.1em;
+      background: var(--accent); border-radius: 2px;
+      animation: blink 1s step-end infinite;
+      vertical-align: text-bottom;
+    }
+
+    /* ── section ─────────────────────────────────── */
+    section { padding: 6rem 2rem; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-size: .75rem; font-weight: 700; letter-spacing: 3px;
+      color: var(--accent); text-transform: uppercase; margin-bottom: .75rem;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800; letter-spacing: -1px;
+      color: var(--text); margin-bottom: 1rem;
+    }
+    .section-desc { color: var(--text-dim); max-width: 560px; font-size: 1.05rem; }
+
+    /* ── features ────────────────────────────────── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.25rem; margin-top: 3rem;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.75rem;
+      transition: border-color .3s, transform .3s, box-shadow .3s;
+    }
+    .feature-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px #38bdf811;
+    }
+    .feature-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 1rem;
+    }
+    .feature-title { font-weight: 700; font-size: 1.05rem; margin-bottom: .4rem; }
+    .feature-desc { color: var(--text-dim); font-size: .9rem; line-height: 1.6; }
+
+    /* ── syntax showcase ─────────────────────────── */
+    #syntax { background: var(--bg2); }
+    .syntax-tabs {
+      display: flex; gap: .5rem; margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: .45rem 1.1rem; border-radius: 6px;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text-dim); font-size: .85rem; font-weight: 600;
+      cursor: pointer; transition: all .2s; font-family: 'Inter', sans-serif;
+    }
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--accent); color: #000; border-color: var(--accent);
+    }
+    .code-block {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+      display: none;
+    }
+    .code-block.active { display: block; }
+    .code-header {
+      background: var(--surface); padding: .6rem 1rem;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .code-lang { font-size: .75rem; color: var(--accent); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+    .code-copy {
+      background: none; border: 1px solid var(--border);
+      color: var(--text-dim); padding: .25rem .7rem;
+      border-radius: 5px; font-size: .72rem; cursor: pointer;
+      transition: all .2s; font-family: 'Inter', sans-serif;
+    }
+    .code-copy:hover { border-color: var(--accent); color: var(--accent); }
+    pre {
+      padding: 1.5rem; overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .88rem; line-height: 1.8; color: var(--text);
+    }
+
+    /* ── install section ─────────────────────────── */
+    #install { background: var(--bg3); }
+    .install-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem; margin-top: 3rem;
+    }
+    .install-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.75rem;
+    }
+    .install-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem; }
+    .install-step {
+      display: flex; gap: .75rem; margin-bottom: .75rem; align-items: flex-start;
+    }
+    .step-num {
+      width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+      background: var(--accent); color: #000;
+      font-size: .72rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step-code {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; padding: .3rem .7rem;
+      font-size: .78rem; color: var(--accent);
+    }
+    .platform-badge {
+      display: inline-block; font-size: .7rem; font-weight: 700;
+      padding: .2rem .6rem; border-radius: 999px; margin-right: .4rem;
+    }
+    .badge-win { background: #1d4ed8; color: #fff; }
+    .badge-linux { background: #166534; color: #fff; }
+
+    /* ── keywords ref ────────────────────────────── */
+    .kw-grid {
+      display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.5rem;
+    }
+    .kw-tag {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: .3rem .75rem;
+      font-size: .82rem; color: var(--accent2);
+      transition: border-color .2s;
+    }
+    .kw-tag:hover { border-color: var(--accent2); }
+
+    /* ── about/author ────────────────────────────── */
+    #about { background: var(--bg2); }
+    .author-card {
+      display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 2.5rem; margin-top: 3rem;
+    }
+    .author-avatar {
+      width: 90px; height: 90px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem; font-weight: 900; color: #000;
+      flex-shrink: 0;
+      animation: float 3s ease infinite;
+    }
+    .author-name { font-size: 1.5rem; font-weight: 800; }
+    .author-handle { color: var(--accent); font-size: .9rem; margin-top: .2rem; }
+    .author-bio { color: var(--text-dim); margin-top: .75rem; max-width: 500px; }
+    .author-links { display: flex; gap: .75rem; margin-top: 1rem; flex-wrap: wrap; }
+    .author-link {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: var(--bg); border: 1px solid var(--border);
+      color: var(--text-dim); padding: .4rem 1rem; border-radius: 7px;
+      text-decoration: none; font-size: .85rem; font-weight: 600;
+      transition: all .2s;
+    }
+    .author-link:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── footer ──────────────────────────────────── */
+    footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 2rem;
+      text-align: center; color: var(--text-faint); font-size: .85rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── responsive ──────────────────────────────── */
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .hero h1 { letter-spacing: -1.5px; }
+      .hero-stats { gap: 1.5rem; }
+    }
+
+    /* ── scrolled-in animation ───────────────────── */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s, transform .7s; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ──────────────────────────────────────── -->
+<nav>
+  <div class="nav-brand">seng <span>/ Simple English</span></div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#syntax">Syntax</a></li>
+    <li><a href="#install">Install</a></li>
+    <li><a href="docs.html">Docs</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="https://nocorps.org" target="_blank" class="nav-cta">nocorps.org ↗</a></li>
+  </ul>
+</nav>
+
+<!-- ── PLATFORM BANNER ────────────────────────────── -->
+<div class="platform-banner">
+  <span>🪟 <span class="win-badge">Windows</span> Available now</span>
+  <span>·</span>
+  <span>🐧 <span class="soon-badge">Linux</span> Coming soon</span>
+  <span>·</span>
+  <span>🍎 <span class="soon-badge">macOS</span> Coming soon</span>
+  <span>·</span>
+  <span>Visit <a href="https://nocorps.org/seng" style="color:#818cf8;text-decoration:none">nocorps.org/seng</a> for downloads &amp; docs</span>
+</div>
+
+<!-- ── HERO ─────────────────────────────────────── -->
+<section class="hero" style="padding-top:10rem">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    Open Source &mdash; Windows Available Now &mdash; by NoCorps.org build by KANAGARAJ-M
+  </div>
+
+  <h1>Code in plain<br/><span class="accent">English</span></h1>
+
+  <p class="hero-sub">
+    seng is a programming language where instructions read like natural English sentences.
+    No symbols to memorise. No complex syntax to learn.
+  </p>
+
+  <div class="hero-buttons">
+
+    <a href="javascript:void(0)" onclick="openDownloadModal()" class="btn btn-primary">⬇ Download for Windows</a>
+    <a href="#syntax" class="btn btn-outline">📖 Learn Syntax</a>
+    <a href="https://nocorps.org" target="_blank" class="btn btn-outline">🌐 nocorps.org</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Plain English</div></div>
+    <div class="stat"><div class="stat-num">C</div><div class="stat-label">Built in pure C</div></div>
+    <div class="stat"><div class="stat-num">.se</div><div class="stat-label">File Extension</div></div>
+    <div class="stat"><div class="stat-num">.sec</div><div class="stat-label">Compiled Bytecode</div></div>
+  </div>
+
+  <div class="terminal-wrap">
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="t-dot t-dot-r"></div>
+        <div class="t-dot t-dot-y"></div>
+        <div class="t-dot t-dot-g"></div>
+        <span class="t-title">hello.se — seng</span>
+      </div>
+      <div class="terminal-body">
+        <div><span class="t-comment"># My first seng program</span></div>
+        <div><span class="t-kw">set</span> <span class="t-var">name</span> <span class="t-kw">to</span> <span class="t-str">"World"</span></div>
+        <div><span class="t-kw">say</span> <span class="t-str">"Hello, "</span> <span class="t-op">+</span> <span class="t-var">name</span> <span class="t-op">+</span> <span class="t-str">"!"</span></div>
+        <br/>
+        <div><span class="t-kw">define</span> <span class="t-fn">greet</span> <span class="t-kw">with</span> <span class="t-var">person</span></div>
+        <div>&nbsp;&nbsp;<span class="t-kw">say</span> <span class="t-str">"Nice to meet you, "</span> <span class="t-op">+</span> <span class="t-var">person</span></div>
+        <div><span class="t-kw">end</span></div>
+        <br/>
+        <div><span class="t-kw">call</span> <span class="t-fn">greet</span> <span class="t-kw">with</span> <span class="t-var">name</span></div>
+        <br/>
+        <div><span class="t-comment">$ seng hello.se</span></div>
+        <div><span class="t-str">Hello, World!</span></div>
+        <div><span class="t-str">Nice to meet you, World</span></div>
+        <span class="t-cursor"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ──────────────────────────────────── -->
+<section id="features">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Why seng?</div>
+      <h2 class="section-title">Built for everyone,<br/>not just programmers</h2>
+      <p class="section-desc">seng removes the barrier between thinking and coding. If you can write an English sentence, you can write a seng program.</p>
+    </div>
+    <div class="features-grid reveal">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#0f2744">📝</div>
+        <div class="feature-title">Plain English Syntax</div>
+        <div class="feature-desc">Write <code style="color:var(--accent)">set age to 25</code> instead of <code style="color:var(--red)">int age = 25;</code>. Every statement reads like a natural sentence.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#0f2722">⚡</div>
+        <div class="feature-title">Compiled + Interpreted</div>
+        <div class="feature-desc">Run source files directly with <code style="color:var(--accent)">seng file.se</code>, or compile to blazing-fast <code style="color:var(--accent)">.sec</code> bytecode.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#1a1040">🔁</div>
+        <div class="feature-title">Reusable Functions</div>
+        <div class="feature-desc">Define functions in plain English, call them anywhere, import whole files — build libraries effortlessly.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#1a0f2e">📦</div>
+        <div class="feature-title">Lists Built-in</div>
+        <div class="feature-desc">Create lists, add items, access by number, get lengths — all with clear English commands.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#0f2f1a">🏗️</div>
+        <div class="feature-title">Written in Pure C</div>
+        <div class="feature-desc">seng is implemented in portable C99 with zero dependencies — fast, lightweight, and runs anywhere GCC does.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#2a1a0f">📂</div>
+        <div class="feature-title">Import & Modules</div>
+        <div class="feature-desc">Split your code across files. Use <code style="color:var(--accent)">import "utils.se"</code> to reuse code across projects.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SYNTAX ────────────────────────────────────── -->
+<section id="syntax">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Language Reference</div>
+      <h2 class="section-title">See how it works</h2>
+      <p class="section-desc">Tap a topic below to explore the seng syntax.</p>
+    </div>
+    <div class="reveal" style="margin-top:2.5rem">
+      <div class="syntax-tabs">
+        <button class="tab-btn active" onclick="showTab('basics')">Basics</button>
+        <button class="tab-btn" onclick="showTab('conditions')">Conditions</button>
+        <button class="tab-btn" onclick="showTab('loops')">Loops</button>
+        <button class="tab-btn" onclick="showTab('functions')">Functions</button>
+        <button class="tab-btn" onclick="showTab('lists')">Lists</button>
+        <button class="tab-btn" onclick="showTab('input')">Input</button>
+      </div>
+
+      <div id="tab-basics" class="code-block active">
+        <div class="code-header">
+          <span class="code-lang">basics.se</span>
+          <button class="code-copy" onclick="copyCode('tab-basics')">Copy</button>
+        </div>
+        <pre><span style="color:#475569"># Variables (numbers, text, true/false)</span>
+<span style="color:#818cf8">set</span> name    <span style="color:#818cf8">to</span> <span style="color:#34d399">"Alice"</span>
+<span style="color:#818cf8">set</span> age     <span style="color:#818cf8">to</span> <span style="color:#fb923c">25</span>
+<span style="color:#818cf8">set</span> score   <span style="color:#818cf8">to</span> <span style="color:#fb923c">98.6</span>
+<span style="color:#818cf8">set</span> active  <span style="color:#818cf8">to</span> <span style="color:#818cf8">true</span>
+<span style="color:#818cf8">set</span> nothing <span style="color:#818cf8">to</span> <span style="color:#818cf8">nothing</span>
+
+<span style="color:#475569"># Arithmetic</span>
+<span style="color:#818cf8">set</span> total   <span style="color:#818cf8">to</span> age <span style="color:#818cf8">plus</span> <span style="color:#fb923c">5</span>
+<span style="color:#818cf8">set</span> half    <span style="color:#818cf8">to</span> age <span style="color:#818cf8">divided by</span> <span style="color:#fb923c">2</span>
+<span style="color:#818cf8">set</span> squared <span style="color:#818cf8">to</span> age <span style="color:#818cf8">times</span> age
+<span style="color:#818cf8">set</span> remain  <span style="color:#818cf8">to</span> age <span style="color:#818cf8">mod</span> <span style="color:#fb923c">7</span>
+
+<span style="color:#475569"># Printing</span>
+<span style="color:#818cf8">say</span> <span style="color:#34d399">"Hello, "</span> + name + <span style="color:#34d399">"!"</span>
+<span style="color:#818cf8">say</span> <span style="color:#34d399">"Age: "</span> + age
+<span style="color:#818cf8">say</span> <span style="color:#34d399">"Total: "</span> + total</pre>
+      </div>
+
+      <div id="tab-conditions" class="code-block">
+        <div class="code-header">
+          <span class="code-lang">conditions.se</span>
+          <button class="code-copy" onclick="copyCode('tab-conditions')">Copy</button>
+        </div>
+        <pre><span style="color:#818cf8">set</span> score <span style="color:#818cf8">to</span> <span style="color:#fb923c">85</span>
+
+<span style="color:#818cf8">if</span> score <span style="color:#818cf8">is greater than or equal to</span> <span style="color:#fb923c">90</span> <span style="color:#818cf8">then</span>
+    <span style="color:#818cf8">say</span> <span style="color:#34d399">"Grade: A"</span>
+<span style="color:#818cf8">else if</span> score <span style="color:#818cf8">is greater than or equal to</span> <span style="color:#fb923c">75</span> <span style="color:#818cf8">then</span>
+    <span style="color:#818cf8">say</span> <span style="color:#34d399">"Grade: B"</span>
+<span style="color:#818cf8">else if</span> score <span style="color:#818cf8">is greater than or equal to</span> <span style="color:#fb923c">60</span> <span style="color:#818cf8">then</span>
+    <span style="color:#818cf8">say</span> <span style="color:#34d399">"Grade: C"</span>
+<span style="color:#818cf8">else</span>
+    <span style="color:#818cf8">say</span> <span style="color:#34d399">"Grade: F"</span>
+<span style="color:#818cf8">end</span>
+
+<span style="color:#475569"># Logical operators</span>
+<span style="color:#818cf8">if</span> score <span style="color:#818cf8">is greater than</span> <span style="color:#fb923c">50</span> <span style="color:#818cf8">and</span> score <span style="color:#818cf8">is less than</span> <span style="color:#fb923c">100</span> <span style="color:#818cf8">then</span>
+    <span style="color:#818cf8">say</span> <span style="color:#34d399">"Valid score"</span>
+<span style="color:#818cf8">end</span></pre>
+      </div>
+
+      <div id="tab-loops" class="code-block">
+        <div class="code-header">
+          <span class="code-lang">loops.se</span>
+          <button class="code-copy" onclick="copyCode('tab-loops')">Copy</button>
+        </div>
+        <pre><span style="color:#475569"># Repeat a fixed number of times</span>
+<span style="color:#818cf8">repeat</span> <span style="color:#fb923c">5</span> <span style="color:#818cf8">times</span>
+    <span style="color:#818cf8">say</span> <span style="color:#34d399">"Hello!"</span>
+<span style="color:#818cf8">end</span>
+
+<span style="color:#475569"># While loop</span>
+<span style="color:#818cf8">set</span> count <span style="color:#818cf8">to</span> <span style="color:#fb923c">1</span>
+<span style="color:#818cf8">while</span> count <span style="color:#818cf8">is less than or equal to</span> <span style="color:#fb923c">10</span>
+    <span style="color:#818cf8">say</span> count
+    <span style="color:#818cf8">set</span> count <span style="color:#818cf8">to</span> count <span style="color:#818cf8">plus</span> <span style="color:#fb923c">1</span>
+<span style="color:#818cf8">end</span>
+
+<span style="color:#475569"># Break and Continue</span>
+<span style="color:#818cf8">set</span> x <span style="color:#818cf8">to</span> <span style="color:#fb923c">0</span>
+<span style="color:#818cf8">repeat</span> <span style="color:#fb923c">20</span> <span style="color:#818cf8">times</span>
+    <span style="color:#818cf8">set</span> x <span style="color:#818cf8">to</span> x <span style="color:#818cf8">plus</span> <span style="color:#fb923c">1</span>
+    <span style="color:#818cf8">if</span> x <span style="color:#818cf8">is equal to</span> <span style="color:#fb923c">10</span> <span style="color:#818cf8">then</span>
+        <span style="color:#818cf8">stop</span>       <span style="color:#475569"># break</span>
+    <span style="color:#818cf8">end</span>
+    <span style="color:#818cf8">if</span> x <span style="color:#818cf8">mod</span> <span style="color:#fb923c">2</span> <span style="color:#818cf8">is equal to</span> <span style="color:#fb923c">0</span> <span style="color:#818cf8">then</span>
+        <span style="color:#818cf8">skip</span>       <span style="color:#475569"># continue</span>
+    <span style="color:#818cf8">end</span>
+    <span style="color:#818cf8">say</span> x
+<span style="color:#818cf8">end</span></pre>
+      </div>
+
+      <div id="tab-functions" class="code-block">
+        <div class="code-header">
+          <span class="code-lang">functions.se</span>
+          <button class="code-copy" onclick="copyCode('tab-functions')">Copy</button>
+        </div>
+        <pre><span style="color:#475569"># Define a function</span>
+<span style="color:#818cf8">define</span> <span style="color:#38bdf8">greet</span> <span style="color:#818cf8">with</span> name
+    <span style="color:#818cf8">say</span> <span style="color:#34d399">"Hello, "</span> + name + <span style="color:#34d399">"!"</span>
+<span style="color:#818cf8">end</span>
+
+<span style="color:#818cf8">call</span> <span style="color:#38bdf8">greet</span> <span style="color:#818cf8">with</span> <span style="color:#34d399">"Alice"</span>
+
+<span style="color:#475569"># Function with return value</span>
+<span style="color:#818cf8">define</span> <span style="color:#38bdf8">addTwo</span> <span style="color:#818cf8">with</span> a <span style="color:#818cf8">and</span> b
+    <span style="color:#818cf8">give back</span> a <span style="color:#818cf8">plus</span> b
+<span style="color:#818cf8">end</span>
+
+<span style="color:#818cf8">set</span> total <span style="color:#818cf8">to</span> <span style="color:#818cf8">result of</span> <span style="color:#38bdf8">addTwo</span> <span style="color:#818cf8">with</span> <span style="color:#fb923c">10</span> <span style="color:#818cf8">and</span> <span style="color:#fb923c">25</span>
+<span style="color:#818cf8">say</span> <span style="color:#34d399">"Sum is: "</span> + total
+
+<span style="color:#475569"># Import library</span>
+<span style="color:#818cf8">import</span> <span style="color:#34d399">"math_utils.se"</span></pre>
+      </div>
+
+      <div id="tab-lists" class="code-block">
+        <div class="code-header">
+          <span class="code-lang">lists.se</span>
+          <button class="code-copy" onclick="copyCode('tab-lists')">Copy</button>
+        </div>
+        <pre><span style="color:#475569"># Create a list</span>
+<span style="color:#818cf8">make list</span> fruits
+
+<span style="color:#475569"># Add items</span>
+<span style="color:#818cf8">add</span> <span style="color:#34d399">"Apple"</span>  <span style="color:#818cf8">to</span> fruits
+<span style="color:#818cf8">add</span> <span style="color:#34d399">"Banana"</span> <span style="color:#818cf8">to</span> fruits
+<span style="color:#818cf8">add</span> <span style="color:#34d399">"Cherry"</span> <span style="color:#818cf8">to</span> fruits
+
+<span style="color:#475569"># Access items (1-indexed)</span>
+<span style="color:#818cf8">say</span> <span style="color:#818cf8">item</span> <span style="color:#fb923c">1</span> <span style="color:#818cf8">of</span> fruits       <span style="color:#475569"># Apple</span>
+<span style="color:#818cf8">say</span> <span style="color:#818cf8">length of</span> fruits        <span style="color:#475569"># 3</span>
+<span style="color:#818cf8">say</span> fruits                   <span style="color:#475569"># [Apple, Banana, Cherry]</span>
+
+<span style="color:#475569"># Iterate with while</span>
+<span style="color:#818cf8">set</span> i <span style="color:#818cf8">to</span> <span style="color:#fb923c">1</span>
+<span style="color:#818cf8">set</span> sz <span style="color:#818cf8">to</span> <span style="color:#818cf8">length of</span> fruits
+<span style="color:#818cf8">while</span> i <span style="color:#818cf8">is less than or equal to</span> sz
+    <span style="color:#818cf8">say</span> <span style="color:#818cf8">item</span> i <span style="color:#818cf8">of</span> fruits
+    <span style="color:#818cf8">set</span> i <span style="color:#818cf8">to</span> i <span style="color:#818cf8">plus</span> <span style="color:#fb923c">1</span>
+<span style="color:#818cf8">end</span></pre>
+      </div>
+
+      <div id="tab-input" class="code-block">
+        <div class="code-header">
+          <span class="code-lang">input.se</span>
+          <button class="code-copy" onclick="copyCode('tab-input')">Copy</button>
+        </div>
+        <pre><span style="color:#475569"># Ask user for input</span>
+<span style="color:#818cf8">ask</span> yourName <span style="color:#818cf8">for</span> <span style="color:#34d399">"What is your name? "</span>
+<span style="color:#818cf8">say</span> <span style="color:#34d399">"Welcome, "</span> + yourName + <span style="color:#34d399">"!"</span>
+
+<span style="color:#818cf8">ask</span> city <span style="color:#818cf8">for</span> <span style="color:#34d399">"Which city are you from? "</span>
+<span style="color:#818cf8">say</span> <span style="color:#34d399">"Great! "</span> + yourName + <span style="color:#34d399">" from "</span> + city</pre>
+      </div>
+    </div>
+
+    <div class="reveal" style="margin-top:3rem">
+      <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:.5rem">Reserved Keywords</h3>
+      <div class="kw-grid">
+        <span class="kw-tag">set</span><span class="kw-tag">to</span><span class="kw-tag">say</span>
+        <span class="kw-tag">ask</span><span class="kw-tag">for</span><span class="kw-tag">if</span>
+        <span class="kw-tag">then</span><span class="kw-tag">else</span><span class="kw-tag">end</span>
+        <span class="kw-tag">repeat</span><span class="kw-tag">times</span><span class="kw-tag">while</span>
+        <span class="kw-tag">stop</span><span class="kw-tag">skip</span><span class="kw-tag">define</span>
+        <span class="kw-tag">with</span><span class="kw-tag">call</span><span class="kw-tag">give back</span>
+        <span class="kw-tag">result of</span><span class="kw-tag">and</span><span class="kw-tag">or</span>
+        <span class="kw-tag">not</span><span class="kw-tag">is</span><span class="kw-tag">greater</span>
+        <span class="kw-tag">less</span><span class="kw-tag">equal</span><span class="kw-tag">than</span>
+        <span class="kw-tag">plus</span><span class="kw-tag">minus</span><span class="kw-tag">times</span>
+        <span class="kw-tag">divided by</span><span class="kw-tag">mod</span>
+        <span class="kw-tag">make list</span><span class="kw-tag">add</span><span class="kw-tag">item</span>
+        <span class="kw-tag">length of</span><span class="kw-tag">import</span>
+        <span class="kw-tag">true</span><span class="kw-tag">false</span><span class="kw-tag">nothing</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── INSTALL ──────────────────────────────────── -->
+<section id="install">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Get Started</div>
+      <h2 class="section-title">Install seng</h2>
+      <p class="section-desc">Get up and running in under a minute on any platform.</p>
+    </div>
+    <div class="install-grid reveal">
+
+      <div class="install-card">
+        <h3>🪟 <span class="platform-badge badge-win">Windows — Available Now</span></h3>
+        <div class="install-step">
+          <div class="step-num">1</div>
+          <div>Download the installer from <a href="javascript:void(0)" onclick="openDownloadModal()" style="color:var(--accent);cursor:pointer">nocorps.org/seng</a></div>
+        </div>
+        <div class="install-step">
+          <div class="step-num">2</div>
+          <div>Run <code class="step-code">seng-setup-1.0.0-windows-x64.exe</code></div>
+        </div>
+        <div class="install-step">
+          <div class="step-num">3</div>
+          <div>Accept the licence &amp; choose install folder</div>
+        </div>
+        <div class="install-step">
+          <div class="step-num">4</div>
+          <div>seng is added to your PATH automatically</div>
+        </div>
+        <div class="install-step">
+          <div class="step-num">5</div>
+          <div><code class="step-code">seng hello.se</code></div>
+        </div>
+      </div>
+
+      <div class="install-card" style="opacity:.65">
+        <h3>🐧 <span class="platform-badge badge-linux">Linux — Coming Soon</span></h3>
+        <div style="color:var(--text-dim);font-size:.9rem;margin-top:.5rem">
+          Linux support is planned for a future release.<br/>
+          Advanced users can build from source using the instructions in the README.<br/><br/>
+          <strong style="color:var(--accent2)">Watch nocorps.org/seng for the announcement.</strong>
+        </div>
+      </div>
+
+      <div class="install-card" style="opacity:.65">
+        <h3>🍎 <span class="platform-badge" style="background:#4b5563;color:#fff">macOS — Coming Soon</span></h3>
+        <div style="color:var(--text-dim);font-size:.9rem;margin-top:.5rem">
+          macOS support is planned for a future release.<br/>
+          Advanced users can build from source using GCC or Clang.<br/><br/>
+          <strong style="color:var(--accent2)">Watch nocorps.org/seng for the announcement.</strong>
+        </div>
+      </div>
+
+      <div class="install-card">
+        <h3>🚀 Quick Usage</h3>
+        <div class="install-step">
+          <div class="step-num">▶</div>
+          <div><code class="step-code">seng hello.se</code> — run directly</div>
+        </div>
+        <div class="install-step">
+          <div class="step-num">⚙</div>
+          <div><code class="step-code">seng compile hello.se</code> → <code class="step-code">hello.sec</code></div>
+        </div>
+        <div class="install-step">
+          <div class="step-num">⚡</div>
+          <div><code class="step-code">seng run hello.sec</code> — run bytecode</div>
+        </div>
+        <div class="install-step">
+          <div class="step-num">?</div>
+          <div><code class="step-code">seng help</code> — show all commands</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="reveal" style="margin-top:2.5rem;text-align:center">
+      <button onclick="openDownloadModal()" class="btn btn-primary" style="font-size:1rem;padding:1rem 2.5rem">
+        ⬇ Download for Windows
+      </button>
+      <a href="https://nocorps.org" target="_blank" class="btn btn-outline" style="font-size:1rem;padding:1rem 2.5rem;margin-left:.75rem">
+        🌐 nocorps.org
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── ROADMAP ──────────────────────────────────────────── -->
+<!-- ── ROADMAP TIMELINE ─────────────────────────────── -->
+<section id="roadmap">
+  <style>
+    #roadmap { background: var(--bg); padding: 6rem 0; overflow: hidden; }
+    .rm-progress-wrap { max-width:460px; margin:2.5rem auto 0; }
+    .rm-progress-label { display:flex; justify-content:space-between; font-size:.75rem; color:var(--text-faint); margin-bottom:.5rem; }
+    .rm-bar { height:6px; background:var(--surface); border-radius:999px; overflow:hidden; }
+    .rm-fill { height:100%; width:0; border-radius:999px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width 1.4s cubic-bezier(.4,0,.2,1); }
+
+    .rm-tl { position:relative; max-width:880px; margin:4rem auto 0; padding:0 1.5rem; }
+    .rm-spine { position:absolute; left:50%; top:10px; bottom:10px; width:2px; transform:translateX(-50%); border-radius:2px; background:linear-gradient(180deg,var(--accent) 0%,var(--accent2) 40%,#c084fc 70%,var(--yellow) 100%); }
+
+    .rm-row { display:flex; align-items:flex-start; margin-bottom:5rem; position:relative; }
+    .rm-row:last-child { margin-bottom:0; }
+    .rm-row.r { flex-direction:row-reverse; }
+
+    .rm-box {
+      width:calc(50% - 46px); background:var(--bg2); border-radius:18px;
+      padding:1.75rem; border:1px solid var(--border);
+      opacity:0; transform:translateY(28px);
+      transition:opacity .6s ease, transform .6s ease, box-shadow .3s;
+    }
+    .rm-box.vis { opacity:1; transform:translateY(0); }
+    .rm-box:hover { transform:translateY(-4px) !important; }
+    .rm-row:not(.r) .rm-box { margin-right:46px; border-right:3px solid var(--accent); box-shadow:0 0 28px rgba(56,189,248,.08); }
+    .rm-row.r       .rm-box { margin-left: 46px; border-left: 3px solid var(--accent2);box-shadow:0 0 28px rgba(129,140,248,.08); }
+    .rr2:not(.r) .rm-box { border-right-color:#c084fc; box-shadow:0 0 28px rgba(192,132,252,.08); }
+    .rr3.r          .rm-box { border-left-color:var(--yellow); box-shadow:0 0 28px rgba(251,191,36,.08); }
+
+    .rm-node { position:absolute; left:50%; top:1.6rem; transform:translateX(-50%); z-index:5; }
+    .rm-dot {
+      width:50px; height:50px; border-radius:50%; background:var(--bg);
+      border:2px solid; display:flex; align-items:center; justify-content:center;
+      font-weight:900; font-size:.85rem; position:relative;
+    }
+    .rr0 .rm-dot { border-color:var(--accent);  color:var(--accent);  box-shadow:0 0 0 6px rgba(56,189,248,.12),0 0 20px rgba(56,189,248,.25); }
+    .rr1 .rm-dot { border-color:var(--accent2); color:var(--accent2); box-shadow:0 0 0 5px rgba(129,140,248,.1),0 0 16px rgba(129,140,248,.2); }
+    .rr2 .rm-dot { border-color:#c084fc;        color:#c084fc;        box-shadow:0 0 0 5px rgba(192,132,252,.1),0 0 16px rgba(192,132,252,.2); }
+    .rr3 .rm-dot { border-color:var(--yellow);  color:var(--yellow);  box-shadow:0 0 0 5px rgba(251,191,36,.1), 0 0 16px rgba(251,191,36,.2); }
+    .rr0 .rm-dot::after { content:''; position:absolute; inset:-8px; border-radius:50%; border:2px solid var(--accent); animation:rmP 2s ease-out infinite; }
+    @keyframes rmP { 0%{transform:scale(1);opacity:.5}100%{transform:scale(1.6);opacity:0} }
+    .rm-live { position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:var(--accent); color:#000; font-size:.5rem; font-weight:900; letter-spacing:1.5px; padding:.15rem .4rem; border-radius:999px; white-space:nowrap; }
+
+    .rm-status { display:inline-flex; align-items:center; gap:.35rem; font-size:.67rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:.2rem .65rem; border-radius:999px; border:1px solid; margin-bottom:.8rem; }
+    .rs0 { color:var(--green);   background:rgba(52,211,153,.1);  border-color:rgba(52,211,153,.25); }
+    .rs1 { color:var(--accent2); background:rgba(129,140,248,.1); border-color:rgba(129,140,248,.25);}
+    .rs2 { color:#c084fc;        background:rgba(192,132,252,.1); border-color:rgba(192,132,252,.25);}
+    .rs3 { color:var(--yellow);  background:rgba(251,191,36,.1);  border-color:rgba(251,191,36,.25); }
+    .rm-ver { font-size:1.55rem; font-weight:900; letter-spacing:-1px; margin-bottom:.15rem; }
+    .rm-cn  { font-size:.75rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:1.2px; font-weight:700; margin-bottom:1.1rem; }
+    .rm-feat { list-style:none; display:flex; flex-direction:column; gap:.5rem; }
+    .rm-feat li { font-size:.875rem; color:var(--text-dim); display:flex; gap:.6rem; align-items:flex-start; }
+    .rm-feat li .ic { width:17px; height:17px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:.6rem; font-weight:800; margin-top:.15rem; }
+    .fdn { color:var(--text) !important; }
+    .fdn .ic { background:rgba(52,211,153,.2); color:var(--green); }
+    .fup .ic { background:var(--surface); color:var(--text-faint); }
+    .rm-eta { display:inline-block; margin-top:1.1rem; font-size:.72rem; background:var(--surface); border:1px solid var(--border); padding:.2rem .6rem; border-radius:6px; color:var(--text-faint); }
+  </style>
+
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">What's coming</div>
+      <h2 class="section-title">Roadmap</h2>
+      <p style="color:var(--text-dim);max-width:520px;margin:0 auto">
+        seng is actively developed. Every version brings us closer to a world where <em>anyone</em> can code.
+      </p>
+    </div>
+    <div class="rm-progress-wrap reveal">
+      <div class="rm-progress-label"><span>Overall Progress</span><span id="rm-pct">0%</span></div>
+      <div class="rm-bar"><div class="rm-fill" id="rmFill"></div></div>
+    </div>
+  </div>
+
+  <div class="rm-tl">
+    <div class="rm-spine"></div>
+
+    <!-- v1.0 LEFT -->
+    <div class="rm-row rr0">
+      <div class="rm-box">
+        <div class="rm-status rs0">&#10003; Released</div>
+        <div class="rm-ver" style="color:var(--accent)">v1.0.0</div>
+        <div class="rm-cn">The Foundation</div>
+        <ul class="rm-feat">
+          <li class="fdn"><span class="ic">&#10003;</span>Interpreter — run .se files directly</li>
+          <li class="fdn"><span class="ic">&#10003;</span>Bytecode compiler + VM (.sec format)</li>
+          <li class="fdn"><span class="ic">&#10003;</span>Variables, if, loops, functions, lists</li>
+          <li class="fdn"><span class="ic">&#10003;</span>Imports for reusable code modules</li>
+          <li class="fdn"><span class="ic">&#10003;</span>Windows installer (.exe) with UAC</li>
+          <li class="fdn"><span class="ic">&#10003;</span>Official website + full docs page</li>
+          <li class="fdn"><span class="ic">&#10003;</span>EULA + license-acceptance download</li>
+        </ul>
+        <div class="rm-eta">Released — April 2026</div>
+      </div>
+      <div class="rm-node">
+        <div class="rm-dot"><span class="rm-live">LIVE</span>1.0</div>
+      </div>
+    </div>
+
+    <!-- v1.1 RIGHT -->
+    <div class="rm-row r rr1">
+      <div class="rm-box">
+        <div class="rm-status rs1">&#128295; Up Next</div>
+        <div class="rm-ver" style="color:var(--accent2)">v1.1.0</div>
+        <div class="rm-cn">Standard Library</div>
+        <ul class="rm-feat">
+          <li class="fup"><span class="ic">&#9675;</span>File I/O &mdash; read file / write file</li>
+          <li class="fup"><span class="ic">&#9675;</span>String methods — upper, lower, contains</li>
+          <li class="fup"><span class="ic">&#9675;</span>for each item in list loop syntax</li>
+          <li class="fup"><span class="ic">&#9675;</span>Math — floor, ceil, round, sqrt, power</li>
+          <li class="fup"><span class="ic">&#9675;</span>Column-level error messages in parser</li>
+          <li class="fup"><span class="ic">&#9675;</span>Interactive REPL — just type seng</li>
+        </ul>
+        <div class="rm-eta">ETA &mdash; Q3 2026</div>
+      </div>
+      <div class="rm-node">
+        <div class="rm-dot">1.1</div>
+      </div>
+    </div>
+
+    <!-- v1.2 LEFT -->
+    <div class="rm-row rr2">
+      <div class="rm-box">
+        <div class="rm-status rs2">&#128302; Coming Soon</div>
+        <div class="rm-ver" style="color:#c084fc">v1.2.0</div>
+        <div class="rm-cn">Cross-Platform</div>
+        <ul class="rm-feat">
+          <li class="fup"><span class="ic">&#9675;</span>&#x1F427; Linux — .deb / .rpm packages</li>
+          <li class="fup"><span class="ic">&#9675;</span>&#x1F34E; macOS — Homebrew formula</li>
+          <li class="fup"><span class="ic">&#9675;</span>&#x1F9E9; VS Code syntax highlighting extension</li>
+          <li class="fup"><span class="ic">&#9675;</span>&#x1F310; Online playground — run seng in-browser</li>
+          <li class="fup"><span class="ic">&#9675;</span>&#x1F4E6; Package manager — share seng libraries</li>
+        </ul>
+        <div class="rm-eta">ETA &mdash; Q4 2026</div>
+      </div>
+      <div class="rm-node">
+        <div class="rm-dot">1.2</div>
+      </div>
+    </div>
+
+    <!-- v2.0 RIGHT -->
+    <div class="rm-row r rr3">
+      <div class="rm-box">
+        <div class="rm-status rs3">&#10024; Future Vision</div>
+        <div class="rm-ver" style="color:var(--yellow)">v2.0.0</div>
+        <div class="rm-cn">seng Evolved</div>
+        <ul class="rm-feat">
+          <li class="fup"><span class="ic">&#9675;</span>&#x1F9E0; AI-assisted code suggestions</li>
+          <li class="fup"><span class="ic">&#9675;</span>&#x1F310; Web output — build pages in seng</li>
+          <li class="fup"><span class="ic">&#9675;</span>&#x1F6E1; Optional type hints &amp; type checking</li>
+          <li class="fup"><span class="ic">&#9675;</span>&#x1F680; Native compilation to machine code</li>
+          <li class="fup"><span class="ic">&#9675;</span>&#x1F3E2; seng Cloud IDE</li>
+          <li class="fup"><span class="ic">&#9675;</span>&#x1F91D; Community + enterprise edition</li>
+        </ul>
+        <div class="rm-eta">ETA &mdash; 2027</div>
+      </div>
+      <div class="rm-node">
+        <div class="rm-dot">2.0</div>
+      </div>
+    </div>
+
+  </div><!-- /rm-tl -->
+
+  <div style="text-align:center;margin-top:4rem;padding-bottom:2rem" class="reveal">
+    <p style="color:var(--text-dim);font-size:.9rem;margin-bottom:1.2rem">Have a feature idea? We'd love to hear it.</p>
+    <a href="mailto:hello@nocorps.org" class="btn btn-outline">&#9993; hello@nocorps.org</a>
+  </div>
+
+  <script>
+    (function(){
+      var fill = document.getElementById('rmFill');
+      var pct  = document.getElementById('rm-pct');
+      var obs = new IntersectionObserver(function(ents){
+        if(ents[0].isIntersecting){
+          setTimeout(function(){ fill.style.width='25%'; pct.textContent='25% complete'; }, 300);
+          obs.disconnect();
+        }
+      },{threshold:.3});
+      obs.observe(document.getElementById('roadmap'));
+
+      document.querySelectorAll('.rm-box').forEach(function(b){
+        new IntersectionObserver(function(ents){
+          ents.forEach(function(e){ if(e.isIntersecting) e.target.classList.add('vis'); });
+        },{threshold:.15}).observe(b);
+      });
+    })();
+  </script>
+</section>
+
+<!-- ── ABOUT ──────────────────────────────────────────────── -->
+<section id="about">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">The Creator</div>
+      <h2 class="section-title">About</h2>
+    </div>
+    <div class="author-card reveal">
+      <div class="author-avatar">M</div>
+      <div>
+        <div class="author-name">NoCorps.org build by KANAGARAJ-M</div>
+        <div class="author-handle">nocorps.org</div>
+        <div class="author-bio">
+          Creator of the seng programming language. Passionate about making programming accessible to everyone &mdash; regardless of technical background. seng was built to bridge the gap between natural language and code.
+        </div>
+        <div class="author-links">
+          <a href="https://nocorps.org" class="author-link">🌐 nocorps.org</a>
+          <a href="https://seng.nocorps.org/docs.html" class="author-link">📚 Docs</a>
+          <a href="mailto:hello@nocorps.org" class="author-link">✉ hello@nocorps.org</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────── -->
+<footer>
+  <div style="margin-bottom:.5rem">
+    <strong style="color:var(--accent)">seng</strong> — Simple English Programming Language
+  </div>
+  <div>
+    Created with ❤️ by <a href="https://nocorps.org">NoCorps.org build by KANAGARAJ-M</a> &middot;
+    <a href="mailto:hello@nocorps.org">hello@nocorps.org</a> &middot;
+    <a href="docs.html">📚 Docs</a> &middot;
+    <a href="https://nocorps.org/contact">Contact</a>
+  </div>
+  <div style="margin-top:.5rem;color:var(--text-faint);font-size:.78rem">
+    Copyright &copy; 2026 NoCorps.org build by KANAGARAJ-M. All rights reserved. &middot;
+    Currently available for Windows only. Linux &amp; macOS support coming soon.
+  </div>
+</footer>
+
+<!-- ── DOWNLOAD MODAL ─────────────────────────────── -->
+<div class="modal-overlay" id="downloadModal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalTitle">📜 License Agreement — seng v1.0.0</h2>
+      <button class="modal-close" onclick="closeDownloadModal()" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-dim);font-size:.85rem;margin-bottom:.75rem">
+        Please read and scroll through the entire License Agreement before downloading.
+      </p>
+      <div class="license-box" id="licenseScroll" onscroll="checkScroll()">
+SENG PROGRAMMING LANGUAGE — END USER LICENSE AGREEMENT
+Version 1.0.0 · Copyright © 2026 NoCorps.org build by KANAGARAJ-M · https://seng.nocorps.org
+
+⚠ DISCLAIMER OF RISK
+USE OF SENG IS ENTIRELY AT YOUR OWN RISK. NOCORPS.ORG AND CONTRIBUTORS ARE NOT RESPONSIBLE FOR ANY DAMAGE, DATA LOSS, SYSTEM FAILURE, OR ANY OTHER HARM ARISING FROM THE USE OR INABILITY TO USE THIS SOFTWARE. THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY OF ANY KIND.
+
+SECTION 1 — PREAMBLE
+This End User License Agreement is a legally binding contract between you and NoCorps.org build by KANAGARAJ-M, the sole creator and copyright holder of the seng programming language. By installing or using this Software you agree to all terms herein.
+
+SECTION 2 — GRANT OF LICENSE
+NoCorps.org build by KANAGARAJ-M grants you a worldwide, royalty-free, non-exclusive, perpetual license to: (a) install and use the Software on any devices you own; (b) copy the Software for backup; (c) study the source code for educational purposes; (d) modify the source code for personal or internal use; (e) distribute verbatim copies with all copyright notices preserved.
+
+SECTION 3 — PERMITTED USES
+You may use seng for any lawful purpose — personal, academic, research, or commercial. You may embed seng in your own products provided you acknowledge original authorship. Programs written in seng may be distributed freely.
+
+SECTION 4 — REDISTRIBUTION
+Redistributions must include a complete copy of this License and retain all copyright notices. Modified versions must be clearly marked and must not misrepresent their origin.
+
+SECTION 5 — RESTRICTIONS
+You may not: (a) remove copyright or attribution notices; (b) claim authorship of seng or its runtime; (c) use the names "seng" or "NoCorps.org build by KANAGARAJ-M" to imply endorsement without written permission.
+
+SECTION 6 — INTELLECTUAL PROPERTY
+The seng language, syntax, lexer, parser, AST, interpreter, bytecode format, and VM remain the exclusive intellectual property of NoCorps.org build by KANAGARAJ-M. No ownership is transferred by this Agreement.
+
+SECTION 7 — DISCLAIMER OF WARRANTIES
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. NOCORPS.ORG DISCLAIMS ALL WARRANTIES INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+SECTION 8 — LIMITATION OF LIABILITY
+NOCORPS.ORG SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES ARISING FROM USE OF THE SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+SECTION 9 — PLATFORM SUPPORT
+Version 1.0.0 officially supports Windows 10 and later. Linux and macOS support is planned for future releases.
+
+SECTION 10 — PRIVACY
+This Software does not collect, transmit, or share any personal data or telemetry. It operates entirely offline.
+
+SECTION 11 — TERMINATION
+Your rights terminate automatically upon breach of any term. On termination you must cease all use and destroy all copies.
+
+SECTION 12 — GOVERNING LAW
+This Agreement is governed by the laws of India. All disputes shall be resolved exclusively in Indian courts.
+
+SECTION 13 — ENTIRE AGREEMENT
+This Agreement constitutes the entire understanding between the parties and supersedes all prior communications.
+──────────────────────────────────────────────────────────────
+Copyright © 2026 NoCorps.org build by KANAGARAJ-M. All Rights Reserved.
+Official Website: https://seng.nocorps.org
+      </div>
+      <div class="modal-accept">
+        <input type="checkbox" id="licenseCheck" onchange="toggleDownload()" disabled />
+        <label for="licenseCheck">I have read and agree to the seng License Agreement</label>
+      </div>
+      <p id="scroll-hint" style="font-size:.78rem;color:var(--yellow);margin-top:.6rem">
+        ↓ Scroll to the bottom of the license to enable the checkbox
+      </p>
+    </div>
+    <div class="modal-foot">
+      <div class="dl-progress" id="dlProgress">
+        <div class="dl-spin"></div>
+        <span>Starting download…</span>
+      </div>
+      <button onclick="closeDownloadModal()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:.7rem 1.4rem;border-radius:8px;cursor:pointer;font-size:.9rem;">Cancel</button>
+      <button id="btn-download" onclick="startDownload()" disabled>
+        ⬇ Accept &amp; Download
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ── tab switcher ─── */
+  function showTab(name) {
+    document.querySelectorAll('.code-block').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  /* ── copy code ─── */
+  function copyCode(id) {
+    const pre = document.getElementById(id).querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      const btn = document.getElementById(id).querySelector('.code-copy');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 1500);
+    });
+  }
+
+  /* ── scroll reveal ─── */
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  /* ── smooth nav highlight ─── */
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    nav.style.borderBottomColor = window.scrollY > 10 ? '#1e2d48' : 'transparent';
+  });
+
+  /* ── download modal ─── */
+  const DOWNLOAD_URL = 'downloads/seng-setup-1.0.0-windows-x64.exe';
+
+  function openDownloadModal() {
+    const modal = document.getElementById('downloadModal');
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    // Reset state
+    document.getElementById('licenseCheck').checked = false;
+    document.getElementById('licenseCheck').disabled = true;
+    document.getElementById('btn-download').disabled = true;
+    document.getElementById('dlProgress').classList.remove('show');
+    document.getElementById('scroll-hint').style.display = 'block';
+    document.getElementById('licenseScroll').scrollTop = 0;
+  }
+
+  function closeDownloadModal() {
+    document.getElementById('downloadModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function checkScroll() {
+    const el = document.getElementById('licenseScroll');
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
+    if (atBottom) {
+      document.getElementById('licenseCheck').disabled = false;
+      document.getElementById('scroll-hint').style.display = 'none';
+    }
+  }
+
+  function toggleDownload() {
+    const checked = document.getElementById('licenseCheck').checked;
+    document.getElementById('btn-download').disabled = !checked;
+  }
+
+  function startDownload() {
+    document.getElementById('btn-download').disabled = true;
+    document.getElementById('dlProgress').classList.add('show');
+    // Trigger the actual file download
+    const a = document.createElement('a');
+    a.href = DOWNLOAD_URL;
+    a.download = 'seng-setup-1.0.0-windows-x64.exe';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => closeDownloadModal(), 2000);
+  }
+
+  // Close modal on overlay click
+  document.getElementById('downloadModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDownloadModal();
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeDownloadModal();
+  });
+</script>
+</body>
+</html>

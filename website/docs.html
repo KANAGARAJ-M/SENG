@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>seng Docs v1.0.0 — Simple English Programming Language</title>
+  <meta name="description" content="Complete documentation for the seng programming language. Installation, keywords, syntax, how to compile and run .se programs. By NoCorps.org build by KANAGARAJ-M." />
+  <meta name="author" content="NoCorps.org build by KANAGARAJ-M" />
+  <meta name="keywords" content="seng documentation, seng language reference, seng keywords, how to use seng, seng tutorial, simple english programming, NoCorps.org build by KANAGARAJ-M" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="seng Docs — Simple English Programming Language" />
+  <meta property="og:description" content="Complete documentation for seng v1.0.0. Learn installation, keywords, syntax, and more." />
+  <meta property="og:url" content="https://nocorps.org/seng/docs.html" />
+  <meta property="og:type" content="article" />
+  <meta property="og:image" content="https://nocorps.org/seng/logo.png" />
+  <link rel="canonical" href="https://nocorps.org/seng/docs.html" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "name": "seng Documentation v1.0.0",
+    "description": "Complete reference documentation for the seng programming language.",
+    "url": "https://nocorps.org/seng/docs.html",
+    "author": { "@type": "Person", "name": "NoCorps.org build by KANAGARAJ-M", "url": "https://nocorps.org" },
+    "version": "1.0.0"
+  }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #080c14; --bg2: #0d1220; --bg3: #111827;
+      --surface:  #161d2e; --border: #1e2d48;
+      --accent:   #38bdf8; --accent2: #818cf8; --accent3: #34d399;
+      --text:     #e2e8f0; --text-dim: #94a3b8; --text-faint: #475569;
+      --red:      #f87171; --yellow: #fbbf24; --green: #34d399;
+      --sidebar-w: 260px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; overflow-x: hidden; }
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: var(--bg); } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    a { color: var(--accent); text-decoration: none; } a:hover { text-decoration: underline; }
+    code { font-family: 'JetBrains Mono', monospace; background: var(--surface); border: 1px solid var(--border); border-radius: 5px; padding: .15rem .45rem; font-size: .85em; color: var(--accent); }
+    pre { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: .88rem; line-height: 1.8; }
+    pre .kw  { color: #818cf8; font-weight: 700; }
+    pre .str { color: #34d399; }
+    pre .num { color: #fb923c; }
+    pre .cmt { color: #475569; }
+    pre .fn  { color: #38bdf8; }
+    pre .op  { color: #c084fc; }
+
+    /* ── top nav ── */
+    nav { position: fixed; top: 0; width: 100%; z-index: 100; background: rgba(8,12,20,.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+    .nav-brand { font-size: 1.3rem; font-weight: 800; color: var(--accent); }
+    .nav-brand span { color: var(--text-dim); font-weight: 300; font-size: .9rem; margin-left: .3rem; }
+    .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+    .nav-links a { color: var(--text-dim); font-size: .88rem; font-weight: 500; transition: color .2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); text-decoration: none; }
+    .nav-ver { font-size: .72rem; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: .2rem .7rem; color: var(--accent2); font-weight: 700; }
+
+    /* ── layout ── */
+    .layout { display: flex; margin-top: 60px; min-height: calc(100vh - 60px); }
+
+    /* ── sidebar ── */
+    .sidebar { width: var(--sidebar-w); flex-shrink: 0; position: fixed; top: 60px; bottom: 0; left: 0; overflow-y: auto; background: var(--bg2); border-right: 1px solid var(--border); padding: 1.5rem 0; }
+    .sidebar-group { margin-bottom: 1.5rem; }
+    .sidebar-group-title { font-size: .68rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--text-faint); padding: 0 1.25rem .5rem; }
+    .sidebar a { display: block; padding: .45rem 1.25rem; font-size: .875rem; color: var(--text-dim); border-left: 2px solid transparent; transition: all .15s; }
+    .sidebar a:hover { color: var(--text); background: var(--surface); text-decoration: none; }
+    .sidebar a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(56,189,248,.06); }
+
+    /* ── content ── */
+    .content { margin-left: var(--sidebar-w); flex: 1; padding: 3rem 4rem 6rem; max-width: 860px; }
+    .doc-section { margin-bottom: 4rem; }
+    .doc-section:target { scroll-margin-top: 80px; }
+
+    /* ── headings ── */
+    .doc-section h2 { font-size: 1.75rem; font-weight: 800; letter-spacing: -.5px; color: var(--text); margin-bottom: .5rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    .doc-section h3 { font-size: 1.15rem; font-weight: 700; color: var(--text); margin: 2rem 0 .75rem; }
+    .doc-section h4 { font-size: .95rem; font-weight: 700; color: var(--accent2); margin: 1.5rem 0 .5rem; }
+    .doc-section p { color: var(--text-dim); margin-bottom: 1rem; }
+    .doc-section ul, .doc-section ol { color: var(--text-dim); padding-left: 1.5rem; margin-bottom: 1rem; }
+    .doc-section li { margin-bottom: .35rem; }
+
+    /* ── version badge ── */
+    .version-badge { display: inline-flex; align-items: center; gap: .5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: .5rem 1rem; margin-bottom: 2rem; font-size: .82rem; color: var(--text-dim); }
+    .version-badge strong { color: var(--accent); }
+
+    /* ── callout boxes ── */
+    .callout { border-radius: 8px; padding: 1rem 1.25rem; margin: 1.25rem 0; font-size: .9rem; display: flex; gap: .75rem; border: 1px solid; }
+    .callout-icon { flex-shrink: 0; font-size: 1.1rem; }
+    .callout.info  { background: rgba(56,189,248,.07); border-color: rgba(56,189,248,.25); color: #bae6fd; }
+    .callout.warn  { background: rgba(251,191,36,.07); border-color: rgba(251,191,36,.25); color: #fde68a; }
+    .callout.tip   { background: rgba(52,211,153,.07); border-color: rgba(52,211,153,.25); color: #a7f3d0; }
+
+    /* ── keyword table ── */
+    .kw-table { width: 100%; border-collapse: collapse; margin: 1rem 0 2rem; font-size: .88rem; }
+    .kw-table thead th { background: var(--surface); color: var(--text); font-weight: 700; padding: .75rem 1rem; text-align: left; border-bottom: 2px solid var(--border); }
+    .kw-table tbody tr { border-bottom: 1px solid var(--border); }
+    .kw-table tbody tr:hover { background: rgba(255,255,255,.02); }
+    .kw-table td { padding: .65rem 1rem; color: var(--text-dim); vertical-align: top; }
+    .kw-table td:first-child { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-weight: 600; white-space: nowrap; }
+    .kw-table td:nth-child(2) { color: var(--accent2); font-size: .8rem; white-space: nowrap; }
+
+    /* ── step boxes ── */
+    .steps { display: flex; flex-direction: column; gap: .75rem; margin: 1rem 0; }
+    .step { display: flex; gap: 1rem; align-items: flex-start; }
+    .step-n { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #000; font-size: .75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: .15rem; }
+    .step-body { flex: 1; }
+    .step-body p { margin: 0; }
+
+    /* ── responsive ── */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .content { margin-left: 0; padding: 1.5rem; }
+    }
+    @media (max-width: 640px) { .nav-links { display: none; } }
+
+    /* ── footer ── */
+    footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text-faint); font-size: .82rem; margin-left: var(--sidebar-w); }
+    footer a { color: var(--accent); }
+    @media (max-width: 768px) { footer { margin-left: 0; } }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand"><a href="index.html" style="color:inherit;text-decoration:none">seng</a> <span>/ Documentation</span></div>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="#installation" class="active">Install</a></li>
+    <li><a href="#keywords">Keywords</a></li>
+    <li><a href="#examples">Examples</a></li>
+    <li><a href="https://nocorps.org" target="_blank">nocorps.org</a></li>
+  </ul>
+  <div class="nav-ver">v1.0.0</div>
+</nav>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">Getting Started</div>
+    <a href="#installation">Installation</a>
+    <a href="#first-program">Your First Program</a>
+    <a href="#run">How to Run</a>
+    <a href="#compile">How to Compile</a>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">Language Guide</div>
+    <a href="#variables">Variables</a>
+    <a href="#arithmetic">Arithmetic</a>
+    <a href="#strings">Strings</a>
+    <a href="#conditions">Conditions</a>
+    <a href="#loops">Loops</a>
+    <a href="#functions">Functions</a>
+    <a href="#lists">Lists</a>
+    <a href="#input">Input</a>
+    <a href="#imports">Imports</a>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">Reference</div>
+    <a href="#keywords">All Keywords</a>
+    <a href="#examples">Full Examples</a>
+    <a href="#cli">CLI Reference</a>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-group-title">More</div>
+    <a href="#faq">FAQ</a>
+    <a href="#contact">Contact</a>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="content">
+
+  <div class="version-badge">
+    <strong>seng v1.0.0</strong> &mdash; Simple English Programming Language &mdash; by <a href="https://nocorps.org">NoCorps.org build by KANAGARAJ-M</a>
+  </div>
+
+  <div class="callout warn">
+    <span class="callout-icon">⚠</span>
+    <span><strong>Use at Your Own Risk.</strong> seng is provided "as is" without any warranty. NoCorps.org build by KANAGARAJ-M is not responsible for any damage, data loss, or system failure arising from use of this software. See the <a href="index.html#install">License</a> for full terms.</span>
+  </div>
+
+  <!-- INSTALLATION -->
+  <section class="doc-section" id="installation">
+    <h2>Installation</h2>
+    <p>seng is currently available for <strong>Windows 10 / 11</strong>. Linux and macOS support is coming soon.</p>
+
+    <h3>Windows — Installer (Recommended)</h3>
+    <div class="steps">
+      <div class="step"><div class="step-n">1</div><div class="step-body"><p>Download the installer from <a href="https://nocorps.org/seng">nocorps.org/seng</a></p></div></div>
+      <div class="step"><div class="step-n">2</div><div class="step-body"><p>Run <code>seng-setup-1.0.0-windows-x64.exe</code> as Administrator</p></div></div>
+      <div class="step"><div class="step-n">3</div><div class="step-body"><p>Read and accept the License Agreement</p></div></div>
+      <div class="step"><div class="step-n">4</div><div class="step-body"><p>Choose your install directory (default: <code>C:\Program Files\seng</code>)</p></div></div>
+      <div class="step"><div class="step-n">5</div><div class="step-body"><p>Click <strong>Install</strong> — seng is added to your system PATH automatically</p></div></div>
+      <div class="step"><div class="step-n">6</div><div class="step-body"><p>Open a <strong>new</strong> terminal and verify: <code>seng help</code></p></div></div>
+    </div>
+
+    
+
+    
+  </section>
+
+  <!-- FIRST PROGRAM -->
+  <section class="doc-section" id="first-program">
+    <h2>Your First Program</h2>
+    <p>Create a file called <code>hello.se</code> and type:</p>
+    <pre><span class="cmt"># My first seng program</span>
+<span class="kw">say</span> <span class="str">"Hello, World!"</span>
+
+<span class="kw">set</span> name <span class="kw">to</span> <span class="str">"Alice"</span>
+<span class="kw">say</span> <span class="str">"Hello, "</span> + name + <span class="str">"!"</span></pre>
+    <p>Then run it:</p>
+    <pre>seng hello.se</pre>
+    <p>Output:</p>
+    <pre><span class="str">Hello, World!
+Hello, Alice!</span></pre>
+  </section>
+
+  <!-- HOW TO RUN -->
+  <section class="doc-section" id="run">
+    <h2>How to Run</h2>
+
+    <h3>Run a source file directly</h3>
+    <pre>seng yourfile.se</pre>
+    <p>This interprets your <code>.se</code> file immediately without compiling.</p>
+
+    <h3>Run compiled bytecode</h3>
+    <pre>seng run yourfile.sec</pre>
+    <p>Runs a previously compiled <code>.sec</code> bytecode file using the seng virtual machine. Faster than running from source.</p>
+
+    <h3>Show help</h3>
+    <pre>seng help</pre>
+  </section>
+
+  <!-- HOW TO COMPILE -->
+  <section class="doc-section" id="compile">
+    <h2>How to Compile</h2>
+    <p>seng can compile your programs to <code>.sec</code> bytecode files for faster execution.</p>
+
+    <h3>Compile a .se file to bytecode</h3>
+    <pre><span class="cmt"># Creates hello.sec in the same folder</span>
+seng compile hello.se</pre>
+
+    <h3>Then run the bytecode</h3>
+    <pre>seng run hello.sec</pre>
+
+    <div class="callout info">
+      <span class="callout-icon">ℹ</span>
+      <span>The <code>.sec</code> bytecode format is seng's own format. It is identified by the magic header <code>SENG</code> and a version byte. Bytecode files are platform-specific and are not portable between different OS targets.</span>
+    </div>
+
+    <h3>Full pipeline example</h3>
+    <pre><span class="cmt"># 1. Write your program</span>
+<span class="kw">set</span> x <span class="kw">to</span> <span class="num">10</span>
+<span class="kw">say</span> x <span class="kw">times</span> <span class="num">2</span>
+
+<span class="cmt"># 2. Compile it</span>
+seng compile myprogram.se   <span class="cmt"># produces myprogram.sec</span>
+
+<span class="cmt"># 3. Run the bytecode</span>
+seng run myprogram.sec</pre>
+  </section>
+
+  <!-- VARIABLES -->
+  <section class="doc-section" id="variables">
+    <h2>Variables</h2>
+    <p>Use <code>set … to …</code> to store values.</p>
+    <pre><span class="kw">set</span> name    <span class="kw">to</span> <span class="str">"Alice"</span>        <span class="cmt"># text (string)</span>
+<span class="kw">set</span> age     <span class="kw">to</span> <span class="num">25</span>             <span class="cmt"># whole number</span>
+<span class="kw">set</span> score   <span class="kw">to</span> <span class="num">98.5</span>           <span class="cmt"># decimal number</span>
+<span class="kw">set</span> active  <span class="kw">to</span> <span class="kw">true</span>           <span class="cmt"># boolean</span>
+<span class="kw">set</span> nothing <span class="kw">to</span> <span class="kw">nothing</span>        <span class="cmt"># null / empty</span></pre>
+    <p>Update a variable the same way:</p>
+    <pre><span class="kw">set</span> age <span class="kw">to</span> age <span class="kw">plus</span> <span class="num">1</span>         <span class="cmt"># age is now 26</span></pre>
+  </section>
+
+  <!-- ARITHMETIC -->
+  <section class="doc-section" id="arithmetic">
+    <h2>Arithmetic</h2>
+    <pre><span class="kw">set</span> a <span class="kw">to</span> <span class="num">10</span>
+<span class="kw">set</span> b <span class="kw">to</span> <span class="num">3</span>
+
+<span class="kw">set</span> sum      <span class="kw">to</span> a <span class="kw">plus</span> b        <span class="cmt"># 13</span>
+<span class="kw">set</span> diff     <span class="kw">to</span> a <span class="kw">minus</span> b       <span class="cmt"># 7</span>
+<span class="kw">set</span> product  <span class="kw">to</span> a <span class="kw">times</span> b       <span class="cmt"># 30  (or use *)</span>
+<span class="kw">set</span> quotient <span class="kw">to</span> a <span class="kw">divided by</span> b  <span class="cmt"># 3.33...</span>
+<span class="kw">set</span> remain   <span class="kw">to</span> a <span class="kw">mod</span> b         <span class="cmt"># 1</span>
+
+<span class="kw">say</span> sum
+<span class="kw">say</span> product</pre>
+  </section>
+
+  <!-- STRINGS -->
+  <section class="doc-section" id="strings">
+    <h2>Strings</h2>
+    <p>String values go in double-quotes. Join strings and values with <code>+</code>.</p>
+    <pre><span class="kw">set</span> first <span class="kw">to</span> <span class="str">"Hello"</span>
+<span class="kw">set</span> last  <span class="kw">to</span> <span class="str">"World"</span>
+<span class="kw">say</span> first + <span class="str">", "</span> + last + <span class="str">"!"</span>   <span class="cmt"># Hello, World!</span>
+
+<span class="kw">set</span> age <span class="kw">to</span> <span class="num">21</span>
+<span class="kw">say</span> <span class="str">"I am "</span> + age + <span class="str">" years old."</span></pre>
+  </section>
+
+  <!-- CONDITIONS -->
+  <section class="doc-section" id="conditions">
+    <h2>Conditions</h2>
+    <pre><span class="kw">set</span> score <span class="kw">to</span> <span class="num">85</span>
+
+<span class="kw">if</span> score <span class="kw">is greater than or equal to</span> <span class="num">90</span> <span class="kw">then</span>
+    <span class="kw">say</span> <span class="str">"Grade: A"</span>
+<span class="kw">else if</span> score <span class="kw">is greater than or equal to</span> <span class="num">75</span> <span class="kw">then</span>
+    <span class="kw">say</span> <span class="str">"Grade: B"</span>
+<span class="kw">else if</span> score <span class="kw">is greater than or equal to</span> <span class="num">60</span> <span class="kw">then</span>
+    <span class="kw">say</span> <span class="str">"Grade: C"</span>
+<span class="kw">else</span>
+    <span class="kw">say</span> <span class="str">"Grade: F"</span>
+<span class="kw">end</span>
+
+<span class="cmt"># Logical and / or / not</span>
+<span class="kw">if</span> score <span class="kw">is greater than</span> <span class="num">50</span> <span class="kw">and</span> score <span class="kw">is less than</span> <span class="num">100</span> <span class="kw">then</span>
+    <span class="kw">say</span> <span class="str">"Valid score"</span>
+<span class="kw">end</span></pre>
+
+    <h4>Comparison operators</h4>
+    <table class="kw-table">
+      <thead><tr><th>English phrase</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>is equal to</td><td>==</td></tr>
+        <tr><td>is not equal to</td><td>!=</td></tr>
+        <tr><td>is greater than</td><td>&gt;</td></tr>
+        <tr><td>is less than</td><td>&lt;</td></tr>
+        <tr><td>is greater than or equal to</td><td>&gt;=</td></tr>
+        <tr><td>is less than or equal to</td><td>&lt;=</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- LOOPS -->
+  <section class="doc-section" id="loops">
+    <h2>Loops</h2>
+
+    <h3>Repeat N times</h3>
+    <pre><span class="kw">repeat</span> <span class="num">5</span> <span class="kw">times</span>
+    <span class="kw">say</span> <span class="str">"Hello!"</span>
+<span class="kw">end</span></pre>
+
+    <h3>While loop</h3>
+    <pre><span class="kw">set</span> count <span class="kw">to</span> <span class="num">1</span>
+<span class="kw">while</span> count <span class="kw">is less than or equal to</span> <span class="num">5</span>
+    <span class="kw">say</span> count
+    <span class="kw">set</span> count <span class="kw">to</span> count <span class="kw">plus</span> <span class="num">1</span>
+<span class="kw">end</span></pre>
+
+    <h3>Break and continue</h3>
+    <pre><span class="kw">set</span> i <span class="kw">to</span> <span class="num">0</span>
+<span class="kw">repeat</span> <span class="num">10</span> <span class="kw">times</span>
+    <span class="kw">set</span> i <span class="kw">to</span> i <span class="kw">plus</span> <span class="num">1</span>
+    <span class="kw">if</span> i <span class="kw">is equal to</span> <span class="num">5</span> <span class="kw">then</span>
+        <span class="kw">stop</span>           <span class="cmt"># break — exit the loop</span>
+    <span class="kw">end</span>
+    <span class="kw">if</span> i <span class="kw">mod</span> <span class="num">2</span> <span class="kw">is equal to</span> <span class="num">0</span> <span class="kw">then</span>
+        <span class="kw">skip</span>           <span class="cmt"># continue — skip to next iteration</span>
+    <span class="kw">end</span>
+    <span class="kw">say</span> i
+<span class="kw">end</span></pre>
+  </section>
+
+  <!-- FUNCTIONS -->
+  <section class="doc-section" id="functions">
+    <h2>Functions</h2>
+
+    <h3>Define a function</h3>
+    <pre><span class="kw">define</span> <span class="fn">greet</span> <span class="kw">with</span> name
+    <span class="kw">say</span> <span class="str">"Hello, "</span> + name + <span class="str">"!"</span>
+<span class="kw">end</span></pre>
+
+    <h3>Call a function</h3>
+    <pre><span class="kw">call</span> <span class="fn">greet</span> <span class="kw">with</span> <span class="str">"Alice"</span>
+<span class="kw">call</span> <span class="fn">greet</span> <span class="kw">with</span> <span class="str">"Bob"</span></pre>
+
+    <h3>Functions with return values</h3>
+    <pre><span class="kw">define</span> <span class="fn">addNumbers</span> <span class="kw">with</span> a <span class="kw">and</span> b
+    <span class="kw">give back</span> a <span class="kw">plus</span> b
+<span class="kw">end</span>
+
+<span class="kw">set</span> total <span class="kw">to</span> <span class="kw">result of</span> <span class="fn">addNumbers</span> <span class="kw">with</span> <span class="num">10</span> <span class="kw">and</span> <span class="num">25</span>
+<span class="kw">say</span> <span class="str">"Total: "</span> + total    <span class="cmt"># Total: 35</span></pre>
+
+    <h3>Multiple parameters</h3>
+    <pre><span class="kw">define</span> <span class="fn">introduce</span> <span class="kw">with</span> name <span class="kw">and</span> age <span class="kw">and</span> city
+    <span class="kw">say</span> name + <span class="str">" is "</span> + age + <span class="str">" years old from "</span> + city
+<span class="kw">end</span>
+
+<span class="kw">call</span> <span class="fn">introduce</span> <span class="kw">with</span> <span class="str">"Alice"</span> <span class="kw">and</span> <span class="num">30</span> <span class="kw">and</span> <span class="str">"Chennai"</span></pre>
+  </section>
+
+  <!-- LISTS -->
+  <section class="doc-section" id="lists">
+    <h2>Lists</h2>
+    <pre><span class="cmt"># Create a list</span>
+<span class="kw">make list</span> fruits
+
+<span class="cmt"># Add items</span>
+<span class="kw">add</span> <span class="str">"Apple"</span>  <span class="kw">to</span> fruits
+<span class="kw">add</span> <span class="str">"Banana"</span> <span class="kw">to</span> fruits
+<span class="kw">add</span> <span class="str">"Cherry"</span> <span class="kw">to</span> fruits
+
+<span class="cmt"># Access items (1-indexed)</span>
+<span class="kw">say</span> <span class="kw">item</span> <span class="num">1</span> <span class="kw">of</span> fruits         <span class="cmt"># Apple</span>
+<span class="kw">say</span> <span class="kw">item</span> <span class="num">3</span> <span class="kw">of</span> fruits         <span class="cmt"># Cherry</span>
+<span class="kw">say</span> <span class="kw">length of</span> fruits         <span class="cmt"># 3</span>
+
+<span class="cmt"># Print all items</span>
+<span class="kw">say</span> fruits                   <span class="cmt"># [Apple, Banana, Cherry]</span>
+
+<span class="cmt"># Loop through a list</span>
+<span class="kw">set</span> i  <span class="kw">to</span> <span class="num">1</span>
+<span class="kw">set</span> sz <span class="kw">to</span> <span class="kw">length of</span> fruits
+<span class="kw">while</span> i <span class="kw">is less than or equal to</span> sz
+    <span class="kw">say</span> <span class="kw">item</span> i <span class="kw">of</span> fruits
+    <span class="kw">set</span> i <span class="kw">to</span> i <span class="kw">plus</span> <span class="num">1</span>
+<span class="kw">end</span></pre>
+  </section>
+
+  <!-- INPUT -->
+  <section class="doc-section" id="input">
+    <h2>User Input</h2>
+    <pre><span class="cmt"># Ask for input and store in a variable</span>
+<span class="kw">ask</span> yourName <span class="kw">for</span> <span class="str">"What is your name? "</span>
+<span class="kw">say</span> <span class="str">"Welcome, "</span> + yourName + <span class="str">"!"</span>
+
+<span class="kw">ask</span> age <span class="kw">for</span> <span class="str">"How old are you? "</span>
+<span class="kw">say</span> <span class="str">"You are "</span> + age + <span class="str">" years old."</span></pre>
+  </section>
+
+  <!-- IMPORTS -->
+  <section class="doc-section" id="imports">
+    <h2>Imports</h2>
+    <p>Split your code across multiple <code>.se</code> files and import them.</p>
+    <pre><span class="cmt"># utils.se — helper functions</span>
+<span class="kw">define</span> <span class="fn">square</span> <span class="kw">with</span> n
+    <span class="kw">give back</span> n <span class="op">*</span> n
+<span class="kw">end</span></pre>
+    <pre><span class="cmt"># main.se — import and use</span>
+<span class="kw">import</span> <span class="str">"utils.se"</span>
+
+<span class="kw">set</span> result <span class="kw">to</span> <span class="kw">result of</span> <span class="fn">square</span> <span class="kw">with</span> <span class="num">7</span>
+<span class="kw">say</span> result    <span class="cmt"># 49</span></pre>
+  </section>
+
+  <!-- KEYWORDS -->
+  <section class="doc-section" id="keywords">
+    <h2>All Keywords</h2>
+    <table class="kw-table">
+      <thead><tr><th>Keyword</th><th>Category</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>set … to …</td><td>Variables</td><td>Assign a value to a variable</td></tr>
+        <tr><td>say …</td><td>Output</td><td>Print a value or expression to the screen</td></tr>
+        <tr><td>ask … for "…"</td><td>Input</td><td>Read a line of input from the user into a variable</td></tr>
+        <tr><td>if … then</td><td>Conditions</td><td>Start a conditional block</td></tr>
+        <tr><td>else if … then</td><td>Conditions</td><td>Additional condition branch</td></tr>
+        <tr><td>else</td><td>Conditions</td><td>Fallback branch when no condition matched</td></tr>
+        <tr><td>end</td><td>Blocks</td><td>Close an if, while, repeat, or define block</td></tr>
+        <tr><td>repeat N times</td><td>Loops</td><td>Repeat a block N times</td></tr>
+        <tr><td>while … </td><td>Loops</td><td>Loop while a condition is true</td></tr>
+        <tr><td>stop</td><td>Loops</td><td>Break out of the current loop</td></tr>
+        <tr><td>skip</td><td>Loops</td><td>Continue to the next loop iteration</td></tr>
+        <tr><td>define … with …</td><td>Functions</td><td>Define a named function with parameters</td></tr>
+        <tr><td>call … with …</td><td>Functions</td><td>Call a function with arguments</td></tr>
+        <tr><td>give back …</td><td>Functions</td><td>Return a value from a function</td></tr>
+        <tr><td>result of … with …</td><td>Functions</td><td>Call a function and capture its return value</td></tr>
+        <tr><td>make list …</td><td>Lists</td><td>Create a new empty list</td></tr>
+        <tr><td>add … to …</td><td>Lists</td><td>Append an item to a list</td></tr>
+        <tr><td>item N of …</td><td>Lists</td><td>Get the item at position N (1-indexed)</td></tr>
+        <tr><td>length of …</td><td>Lists</td><td>Get the number of items in a list</td></tr>
+        <tr><td>import "file.se"</td><td>Modules</td><td>Include and execute another seng file</td></tr>
+        <tr><td>plus</td><td>Arithmetic</td><td>Addition (+)</td></tr>
+        <tr><td>minus</td><td>Arithmetic</td><td>Subtraction (−)</td></tr>
+        <tr><td>times</td><td>Arithmetic</td><td>Multiplication (×) — also <code>*</code></td></tr>
+        <tr><td>divided by</td><td>Arithmetic</td><td>Division (÷)</td></tr>
+        <tr><td>mod</td><td>Arithmetic</td><td>Modulo / remainder</td></tr>
+        <tr><td>is equal to</td><td>Comparison</td><td>Equality check (==)</td></tr>
+        <tr><td>is not equal to</td><td>Comparison</td><td>Inequality check (!=)</td></tr>
+        <tr><td>is greater than</td><td>Comparison</td><td>Greater than (&gt;)</td></tr>
+        <tr><td>is less than</td><td>Comparison</td><td>Less than (&lt;)</td></tr>
+        <tr><td>is greater than or equal to</td><td>Comparison</td><td>Greater than or equal (&gt;=)</td></tr>
+        <tr><td>is less than or equal to</td><td>Comparison</td><td>Less than or equal (&lt;=)</td></tr>
+        <tr><td>and</td><td>Logical</td><td>Logical AND — both conditions must be true</td></tr>
+        <tr><td>or</td><td>Logical</td><td>Logical OR — at least one condition must be true</td></tr>
+        <tr><td>not</td><td>Logical</td><td>Logical NOT — inverts a boolean value</td></tr>
+        <tr><td>true</td><td>Values</td><td>Boolean true</td></tr>
+        <tr><td>false</td><td>Values</td><td>Boolean false</td></tr>
+        <tr><td>nothing</td><td>Values</td><td>Null / empty value</td></tr>
+        <tr><td># …</td><td>Comments</td><td>Everything after # on a line is ignored</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- FULL EXAMPLES -->
+  <section class="doc-section" id="examples">
+    <h2>Full Examples</h2>
+
+    <h3>Calculator</h3>
+    <pre><span class="kw">ask</span> a <span class="kw">for</span> <span class="str">"Enter first number: "</span>
+<span class="kw">ask</span> b <span class="kw">for</span> <span class="str">"Enter second number: "</span>
+
+<span class="kw">say</span> <span class="str">"Sum:        "</span> + (a <span class="kw">plus</span> b)
+<span class="kw">say</span> <span class="str">"Difference: "</span> + (a <span class="kw">minus</span> b)
+<span class="kw">say</span> <span class="str">"Product:    "</span> + (a <span class="op">*</span> b)
+<span class="kw">say</span> <span class="str">"Quotient:   "</span> + (a <span class="kw">divided by</span> b)</pre>
+
+    <h3>Fibonacci Sequence</h3>
+    <pre><span class="kw">set</span> a <span class="kw">to</span> <span class="num">0</span>
+<span class="kw">set</span> b <span class="kw">to</span> <span class="num">1</span>
+<span class="kw">set</span> count <span class="kw">to</span> <span class="num">10</span>
+<span class="kw">set</span> i <span class="kw">to</span> <span class="num">0</span>
+
+<span class="kw">while</span> i <span class="kw">is less than</span> count
+    <span class="kw">say</span> a
+    <span class="kw">set</span> temp <span class="kw">to</span> b
+    <span class="kw">set</span> b <span class="kw">to</span> a <span class="kw">plus</span> b
+    <span class="kw">set</span> a <span class="kw">to</span> temp
+    <span class="kw">set</span> i <span class="kw">to</span> i <span class="kw">plus</span> <span class="num">1</span>
+<span class="kw">end</span></pre>
+
+    <h3>Shopping List</h3>
+    <pre><span class="kw">make list</span> cart
+<span class="kw">add</span> <span class="str">"Milk"</span>   <span class="kw">to</span> cart
+<span class="kw">add</span> <span class="str">"Bread"</span>  <span class="kw">to</span> cart
+<span class="kw">add</span> <span class="str">"Eggs"</span>   <span class="kw">to</span> cart
+<span class="kw">add</span> <span class="str">"Butter"</span> <span class="kw">to</span> cart
+
+<span class="kw">say</span> <span class="str">"Your shopping list has "</span> + (<span class="kw">length of</span> cart) + <span class="str">" items:"</span>
+
+<span class="kw">set</span> i  <span class="kw">to</span> <span class="num">1</span>
+<span class="kw">set</span> sz <span class="kw">to</span> <span class="kw">length of</span> cart
+<span class="kw">while</span> i <span class="kw">is less than or equal to</span> sz
+    <span class="kw">say</span> i + <span class="str">". "</span> + (<span class="kw">item</span> i <span class="kw">of</span> cart)
+    <span class="kw">set</span> i <span class="kw">to</span> i <span class="kw">plus</span> <span class="num">1</span>
+<span class="kw">end</span></pre>
+
+    <h3>Guessing Game</h3>
+    <pre><span class="kw">set</span> secret <span class="kw">to</span> <span class="num">42</span>
+<span class="kw">set</span> guessed <span class="kw">to</span> <span class="kw">false</span>
+
+<span class="kw">while</span> guessed <span class="kw">is equal to</span> <span class="kw">false</span>
+    <span class="kw">ask</span> guess <span class="kw">for</span> <span class="str">"Guess the number: "</span>
+    <span class="kw">if</span> guess <span class="kw">is equal to</span> secret <span class="kw">then</span>
+        <span class="kw">say</span> <span class="str">"Correct! Well done!"</span>
+        <span class="kw">set</span> guessed <span class="kw">to</span> <span class="kw">true</span>
+    <span class="kw">else if</span> guess <span class="kw">is less than</span> secret <span class="kw">then</span>
+        <span class="kw">say</span> <span class="str">"Too low! Try higher."</span>
+    <span class="kw">else</span>
+        <span class="kw">say</span> <span class="str">"Too high! Try lower."</span>
+    <span class="kw">end</span>
+<span class="kw">end</span></pre>
+  </section>
+
+  <!-- CLI REFERENCE -->
+  <section class="doc-section" id="cli">
+    <h2>CLI Reference</h2>
+    <table class="kw-table">
+      <thead><tr><th>Command</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>seng file.se</td><td>Interpret and run a seng source file</td></tr>
+        <tr><td>seng compile file.se</td><td>Compile source to file.sec bytecode</td></tr>
+        <tr><td>seng run file.sec</td><td>Run a compiled bytecode file</td></tr>
+        <tr><td>seng help</td><td>Show help and version information</td></tr>
+      </tbody>
+    </table>
+    <div class="callout info">
+      <span class="callout-icon">ℹ</span>
+      <span>After installation, <code>seng</code> is available in any terminal. You may need to open a new terminal window for the PATH to take effect.</span>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="doc-section" id="faq">
+    <h2>FAQ</h2>
+
+    <h3>Is seng free?</h3>
+    <p>Yes. seng is free to use, including for commercial projects. See the <a href="index.html">License</a> for full terms.</p>
+
+    <h3>Can I use seng to teach kids?</h3>
+    <p>Absolutely! seng was designed specifically for beginners and young learners. Its plain English syntax makes it ideal for education.</p>
+
+    <h3>What is the difference between .se and .sec files?</h3>
+    <p><code>.se</code> files are plain text source code that you write and edit. <code>.sec</code> files are compiled bytecode — faster to run, produced by <code>seng compile</code>.</p>
+
+    <h3>Is seng available on Mac or Linux?</h3>
+    <p>Not yet officially. Linux and macOS support is planned. Advanced users can build seng from source using GCC on any platform.</p>
+
+    <h3>How do I report a bug?</h3>
+    <p>Email <a href="mailto:hello@nocorps.org">hello@nocorps.org</a> with your <code>.se</code> file and the error output.</p>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="doc-section" id="contact">
+    <h2>Contact</h2>
+    <p>For support, bug reports, or feedback:</p>
+    <ul>
+      <li>Email: <a href="mailto:hello@nocorps.org">hello@nocorps.org</a></li>
+      <li>Website: <a href="https://nocorps.org" target="_blank">nocorps.org</a></li>
+      <li>seng site: <a href="https://nocorps.org/seng">nocorps.org/seng</a></li>
+    </ul>
+    <div class="callout warn">
+      <span class="callout-icon">⚠</span>
+      <span>seng is used at your own risk. NoCorps.org build by KANAGARAJ-M is not responsible for any issues arising from use of this software.</span>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<footer>
+  <div>seng v1.0.0 Documentation &mdash; Created by <a href="https://nocorps.org">NoCorps.org build by KANAGARAJ-M</a></div>
+  <div style="margin-top:.3rem"><a href="mailto:hello@nocorps.org">hello@nocorps.org</a> &middot; <a href="index.html">Home</a> &middot; <a href="https://nocorps.org">nocorps.org</a></div>
+  <div style="margin-top:.3rem;color:var(--text-faint)">Copyright &copy; 2026 NoCorps.org build by KANAGARAJ-M. All rights reserved. Use at your own risk.</div>
+</footer>
+
+<script>
+  // Highlight active sidebar link on scroll
+  const sections = document.querySelectorAll('.doc-section');
+  const links = document.querySelectorAll('.sidebar a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const lnk = document.querySelector('.sidebar a[href="#' + e.target.id + '"]');
+        if (lnk) lnk.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

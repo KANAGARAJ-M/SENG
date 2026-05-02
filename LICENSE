@@ -1,0 +1,403 @@
+
+SENG PROGRAMMING LANGUAGE — END USER LICENSE AGREEMENT
+Simple English Programming Language, Version 1.0.0
+Copyright © 2026 NoCorps.org build by KANAGARAJ-M. All Rights Reserved.
+Official Website: https://nocorps.org/seng
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PLEASE READ THIS LICENSE AGREEMENT CAREFULLY BEFORE INSTALLING, COPYING, OR
+USING THE SENG PROGRAMMING LANGUAGE SOFTWARE. BY INSTALLING OR USING THIS
+SOFTWARE, YOU AGREE TO BE BOUND BY THE TERMS OF THIS AGREEMENT.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SECTION 1 — PREAMBLE
+
+This End User License Agreement ("Agreement") is a legally binding contract
+between you ("User", "Licensee", or "You") and NoCorps.org build by KANAGARAJ-M ("Author",
+"Licensor", or "We"), the sole creator and copyright holder of the seng
+programming language and all associated software, documentation, compiler
+tools, runtime systems, bytecode formats, example programs, and related
+materials (collectively referred to as the "Software"). This Agreement
+governs all use, installation, reproduction, modification, and distribution
+of the Software and supersedes any prior oral or written agreements between
+the parties regarding the subject matter herein.
+
+SECTION 2 — GRANT OF LICENSE
+
+Subject to the terms and conditions of this Agreement, NoCorps.org build by KANAGARAJ-M hereby
+grants you a worldwide, royalty-free, non-exclusive, perpetual license to:
+(a) install and use the Software on any number of computers or devices you
+own or control; (b) copy the Software for backup or archival purposes;
+(c) use, study, and reference the Software's source code for educational and
+research purposes; (d) modify the Software's source code for your own
+personal or internal organisational use; and (e) distribute verbatim copies
+of the Software, provided that all copyright notices and this license are
+preserved in their entirety in every copy. This license does not grant any
+rights not explicitly stated in this Agreement.
+
+SECTION 3 — PERMITTED USES
+
+You are explicitly permitted to use the seng programming language for any
+lawful purpose, whether personal, academic, research-oriented, or
+commercial. You may embed seng within your own applications, tools, or
+products, provided you acknowledge the original authorship of the Software
+in your product documentation. You may use seng to build, compile, and
+distribute programs written in the seng language without restriction. You
+may create derivative works based on the Software's concepts, syntax, and
+runtime design, provided such works are clearly identified as distinct from
+the original seng Software and do not misrepresent their origin.
+
+SECTION 4 — REDISTRIBUTION CONDITIONS
+
+If you choose to redistribute the Software, whether in original or modified
+form, you must include a complete and unaltered copy of this License
+Agreement. You must retain all copyright notices, author attribution lines,
+and official website references in all copies or substantial portions of the
+Software. You may not remove, alter, or obscure any legal notices contained
+in the Software. When distributing modified versions, you must clearly mark
+the modifications as your own and must not represent the modified software
+as the original work of NoCorps.org build by KANAGARAJ-M. You are encouraged, but not required,
+to contribute improvements back to the original Software through official
+channels at nocorps.org.
+
+SECTION 5 — RESTRICTIONS
+
+You are expressly prohibited from: (a) removing or altering any copyright,
+trademark, or attribution notices from the Software or its documentation;
+(b) claiming to be the original author or creator of the seng language or
+its core runtime systems; (c) distributing the Software under a different
+name while presenting it as the original seng without prior written consent
+from NoCorps.org build by KANAGARAJ-M; (d) using the name "seng", "Simple English", or
+"NoCorps.org build by KANAGARAJ-M" in a way that implies official endorsement of a derived product
+without explicit written permission; (e) reverse engineering the compiled
+bytecode format for purposes that violate this Agreement; (f) sublicensing
+the Software in a manner inconsistent with the terms herein.
+
+SECTION 6 — INTELLECTUAL PROPERTY OWNERSHIP
+
+The seng programming language, including its syntax specification, lexer
+design, parser grammar, abstract syntax tree structure, interpreter
+architecture, bytecode format, virtual machine design, standard library,
+and all associated documentation, are and shall remain the exclusive
+intellectual property of NoCorps.org build by KANAGARAJ-M. This Agreement does not transfer any
+ownership rights to You. All trademarks, service marks, trade names, and
+logos associated with the seng language remain the exclusive property of
+NoCorps.org build by KANAGARAJ-M. Nothing in this Agreement shall be construed as granting any
+rights in such trademarks or service marks, except as required to comply
+with the requirements of applicable law.
+
+SECTION 7 — DISCLAIMER OF WARRANTIES
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED. TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, NOCORPS.ORG
+EXPRESSLY DISCLAIMS ALL WARRANTIES, WHETHER EXPRESS, IMPLIED, STATUTORY,
+OR OTHERWISE, INCLUDING WITHOUT LIMITATION ANY IMPLIED WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND
+NON-INFRINGEMENT. NOCORPS.ORG DOES NOT WARRANT THAT THE SOFTWARE WILL MEET
+YOUR REQUIREMENTS, THAT THE OPERATION OF THE SOFTWARE WILL BE UNINTERRUPTED
+OR ERROR-FREE, THAT DEFECTS IN THE SOFTWARE WILL BE CORRECTED, OR THAT THE
+SOFTWARE IS FREE OF VIRUSES OR OTHER HARMFUL COMPONENTS. THE ENTIRE RISK AS
+TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH YOU.
+
+SECTION 8 — LIMITATION OF LIABILITY
+
+IN NO EVENT SHALL NOCORPS.ORG, HIS AFFILIATES, LICENSORS, SERVICE PROVIDERS,
+EMPLOYEES, AGENTS, OFFICERS, OR DIRECTORS BE LIABLE FOR ANY INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, CONSEQUENTIAL, OR PUNITIVE DAMAGES OF ANY
+KIND, INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, LOSS OF DATA, LOSS OF
+GOODWILL, BUSINESS INTERRUPTION, SYSTEM FAILURE, OR COMPUTER FAILURE,
+ARISING OUT OF OR IN ANY WAY RELATED TO YOUR USE OF OR INABILITY TO USE
+THE SOFTWARE, WHETHER BASED ON WARRANTY, CONTRACT, TORT (INCLUDING
+NEGLIGENCE), STRICT LIABILITY, OR ANY OTHER LEGAL THEORY, EVEN IF
+NOCORPS.ORG HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. IN
+JURISDICTIONS THAT DO NOT ALLOW THE EXCLUSION OR LIMITATION OF LIABILITY
+FOR CONSEQUENTIAL OR INCIDENTAL DAMAGES, THE ABOVE LIMITATION MAY NOT
+APPLY TO YOU.
+
+SECTION 9 — INDEMNIFICATION
+
+You agree to indemnify, defend, and hold harmless NoCorps.org build by KANAGARAJ-M and his
+officers, directors, employees, agents, licensors, and service providers
+from and against any claims, liabilities, damages, judgments, awards,
+losses, costs, expenses, or fees (including reasonable attorneys' fees)
+arising out of or relating to your violation of this Agreement or your use
+of the Software, including, but not limited to, your use of the Software's
+content, services, and products other than as expressly authorised in this
+Agreement, or your use of any information obtained from the Software.
+
+SECTION 10 — OPEN SOURCE COMPONENTS
+
+The seng programming language is an original work created independently by
+NoCorps.org build by KANAGARAJ-M. The Software is written in the C programming language and does
+not incorporate any third-party open-source libraries or components at
+runtime. The Software depends only on standard C library functions (libc)
+and the standard math library (libm), both of which are universally
+available on all supported platforms. The seng installer may optionally
+download or reference the GCC compiler (GNU Compiler Collection) and/or
+Clang LLVM compiler, which are separate open-source projects governed by
+their own respective licenses (GPLv3 and Apache 2.0 respectively) and are
+not part of this Software.
+
+SECTION 11 — PLATFORM SUPPORT
+
+As of Version 1.0.0, the seng programming language is officially supported
+and distributed for the Microsoft Windows platform (Windows 10 and later).
+Support for Linux-based operating systems and macOS is planned for a future
+release and will be announced on the official website at nocorps.org.
+NoCorps.org build by KANAGARAJ-M makes no warranty or guarantee regarding the timeline for
+additional platform support. Installation and usage of the Software on
+unsupported platforms is at the user's own risk and is not covered by any
+support obligations from the Author.
+
+SECTION 12 — UPDATES AND VERSIONING
+
+NoCorps.org build by KANAGARAJ-M reserves the right to release updated versions of the seng
+programming language at any time. Updates may include new features, bug
+fixes, performance improvements, syntax enhancements, or breaking changes
+to the language specification. This Agreement applies to all versions of the
+Software unless a newer version of this Agreement is included with an update.
+You are encouraged to keep your installation up to date by visiting the
+official website at nocorps.org. You are under no obligation to update
+and may continue using any version of the Software you have validly licensed.
+
+SECTION 13 — TERMINATION
+
+This Agreement is effective upon your installation or use of the Software and
+remains in effect until terminated. Your rights under this Agreement will
+terminate automatically without notice from NoCorps.org build by KANAGARAJ-M if you fail to comply
+with any term of this Agreement. Upon termination of this Agreement, you must
+cease all use of the Software and destroy all copies, full or partial, of the
+Software in your possession. Termination will not limit any of NoCorps.org build by KANAGARAJ-M's
+rights or remedies at law or in equity in case of breach by you during the
+term of this Agreement. All provisions of this Agreement which by their
+nature should survive termination shall survive, including without limitation
+ownership provisions, warranty disclaimers, and limitation of liability.
+
+SECTION 14 — GOVERNING LAW AND JURISDICTION
+
+This Agreement shall be governed by and construed in accordance with the laws
+of India, without giving effect to any choice or conflict of law provision or
+rule. Any legal action or proceeding arising under this Agreement will be
+brought exclusively in courts located in India, and the parties hereby
+irrevocably consent to the personal jurisdiction and venue therein. If any
+provision of this Agreement is held by a court of competent jurisdiction to
+be contrary to law, such provision shall be changed and interpreted so as to
+best accomplish the objectives of the original provision to the fullest
+extent allowed by law, and the remaining provisions of this Agreement shall
+continue in full force and effect.
+
+SECTION 15 — PRIVACY POLICY
+
+The seng programming language software, including its compiled installer, does
+not collect, transmit, or share any personal data, usage statistics, telemetry
+information, or identifying information from your computer or system. The
+Software operates entirely offline. No analytics, tracking scripts, or network
+requests are made during normal operation. Any internet connectivity used by
+the installer is solely for downloading optional dependencies (such as GCC)
+from their official distribution servers, and no information about the user
+or their system is transmitted to NoCorps.org build by KANAGARAJ-M or any third party during this
+process. For full privacy information, visit nocorps.org/privacy.
+
+SECTION 16 — CHILDREN'S PRIVACY
+
+The seng programming language is designed to be accessible to learners of
+all ages, including students and young learners who are new to programming.
+The Software does not collect any personal information from users of any age.
+Parents and guardians are encouraged to supervise the use of any software
+by minors. The Software itself presents no privacy risks, as it performs
+no data collection or transmission. The official website at nocorps.org
+complies with applicable children's privacy protection laws and regulations
+where required.
+
+SECTION 17 — ACCESSIBILITY
+
+NoCorps.org build by KANAGARAJ-M is committed to making the seng programming language accessible
+to users of all abilities and technical backgrounds. The language's core design
+philosophy of using plain English syntax is intended to lower the barrier
+to entry for programming education. The Software is provided in a format
+compatible with screen readers and accessibility tools where technically
+feasible. If you encounter accessibility barriers in the Software or its
+documentation, please contact us at nocorps.org to report the issue.
+We will make reasonable efforts to address documented accessibility concerns
+in future releases.
+
+SECTION 18 — EDUCATIONAL USE
+
+The seng programming language is particularly well suited for educational
+environments, including schools, colleges, universities, coding bootcamps,
+and self-directed learning programs. Educational institutions are hereby
+granted express permission to install and use the Software on any number of
+student devices, teaching computers, or lab machines for educational purposes
+without requiring individual licenses for each installation. Distribution of
+the Software as part of educational course materials or curricula is permitted
+provided that this License Agreement is included in all distributed materials
+and that no fee is charged specifically for the Software itself beyond the
+normal cost of course materials.
+
+SECTION 19 — COMMERCIAL USE
+
+Commercial use of the seng programming language is permitted under this
+Agreement. You may use seng in commercial software products, internal
+business tools, client-facing applications, and commercial services without
+paying royalties or fees to NoCorps.org build by KANAGARAJ-M. If you build a commercial product
+that uses seng as a core component, you are encouraged (but not required)
+to acknowledge seng in your product documentation and website. You may charge
+fees for software products that incorporate or depend on seng, provided that
+you do not misrepresent the seng language itself as your own proprietary
+technology and that you do not claim copyright over the seng interpreter,
+compiler, or runtime systems.
+
+SECTION 20 — CONTRIBUTION POLICY
+
+Contributions to the seng programming language project are welcomed by the
+community. If you submit code, documentation, bug reports, feature requests,
+or other materials to the project, you acknowledge that such contributions
+may be incorporated into the Software at the discretion of NoCorps.org build by KANAGARAJ-M and
+that such incorporated contributions will be subject to this License
+Agreement. By submitting a contribution, you represent that you have the
+right to submit it and that the contribution does not infringe any third-party
+intellectual property rights. Contributors retain copyright in their own
+contributions but grant NoCorps.org build by KANAGARAJ-M a perpetual, worldwide, royalty-free
+license to use, reproduce, modify, display, and distribute such contributions.
+
+SECTION 21 — DOCUMENTATION LICENSE
+
+All documentation accompanying the seng programming language, including the
+README file, language reference, syntax guide, tutorial materials, and any
+other written materials distributed with the Software, are licensed under
+the terms of this Agreement. You are free to read, share, and adapt the
+documentation for your own purposes, provided you attribute the original
+work to NoCorps.org build by KANAGARAJ-M and include a reference to the official website at
+nocorps.org. You may not claim authorship of the original documentation.
+Translations of the documentation into other languages are encouraged and
+are considered derivative works subject to the same terms as the original
+documentation.
+
+SECTION 22 — BYTECODE FORMAT
+
+The seng bytecode format, identified by the file extension ".sec" and the
+magic bytes "SENG", is an original specification created by NoCorps.org build by KANAGARAJ-M. You
+are free to write tools, utilities, or applications that read, write, analyse,
+or process the .sec bytecode format, provided that such tools are compatible
+with the official specification and that you acknowledge the origin of the
+format in your tool's documentation. NoCorps.org build by KANAGARAJ-M reserves the right to evolve
+the bytecode format in future versions. Future versions of the bytecode format
+will be assigned new version numbers and may not be backward-compatible with
+.sec files compiled by earlier versions of the seng compiler.
+
+SECTION 23 — LANGUAGE SPECIFICATION
+
+The seng language specification, including its keyword set, grammar rules,
+operator precedence, expression syntax, statement forms, type system, and
+runtime behaviour as implemented in the reference interpreter, constitutes
+the normative definition of the seng language. NoCorps.org build by KANAGARAJ-M reserves the right
+to make additions, changes, or clarifications to the language specification
+in future versions. Where possible, changes will be designed to maintain
+backward compatibility with existing seng source programs. However, no
+guarantee of backward compatibility is made for major version releases.
+
+SECTION 24 — SECURITY DISCLOSURE POLICY
+
+If you discover a security vulnerability in the seng programming language,
+its interpreter, compiler, virtual machine, or any associated tools, you are
+encouraged to practise responsible disclosure. Please report security issues
+directly to NoCorps.org build by KANAGARAJ-M through the official contact channels available at
+nocorps.org. Allow a reasonable amount of time (typically 90 days) for
+the issue to be investigated and addressed before public disclosure. Security
+researchers who responsibly report genuine vulnerabilities will be credited
+in the release notes of the version that addresses the vulnerability, unless
+they prefer to remain anonymous. Do not intentionally exploit any discovered
+vulnerability and do not share details of unpatched vulnerabilities with
+third parties.
+
+SECTION 25 — EXPORT COMPLIANCE
+
+You agree to comply with all applicable export laws and regulations, including
+the export administration regulations of your country of residence and the
+destination country if distributing the Software internationally. You
+represent and warrant that you are not located in any country that is subject
+to a government embargo and that you are not on any government list of
+prohibited or restricted parties. The Software consists entirely of general-
+purpose programming language tools and is not subject to special export
+control classifications in most jurisdictions, but it is your responsibility
+to verify compliance with applicable laws in your specific situation.
+
+SECTION 26 — FORCE MAJEURE
+
+NoCorps.org build by KANAGARAJ-M shall not be liable for any failure or delay in performing
+obligations under this Agreement to the extent that such failure or delay is
+caused by circumstances beyond NoCorps.org build by KANAGARAJ-M's reasonable control, including
+but not limited to acts of God, natural disasters, war, terrorism, riots,
+embargoes, governmental acts, fires, floods, accidents, strikes, or failures
+of third-party services. In the event of such circumstances, NoCorps.org build by KANAGARAJ-M's
+obligations will be suspended for the duration of the force majeure event.
+
+SECTION 27 — ENTIRE AGREEMENT
+
+This Agreement, together with any amendments and any additional agreements you
+may enter into with NoCorps.org build by KANAGARAJ-M in connection with the Software, shall
+constitute the entire agreement between the parties concerning the Software
+and supersede all prior or contemporaneous oral or written communications,
+proposals, representations, warranties, and agreements between the parties
+with respect to the Software or any subject covered by this Agreement.
+No amendment to or modification of this Agreement will be binding unless
+in writing and signed by a duly authorised representative of NoCorps.org build by KANAGARAJ-M.
+
+SECTION 28 — WAIVER
+
+No failure or delay by NoCorps.org build by KANAGARAJ-M in exercising any right, power, or remedy
+under this Agreement shall operate as a waiver of that right, power, or remedy.
+No single or partial exercise of any right, power, or remedy shall preclude any
+other or further exercise of that right, power, or remedy, or the exercise of
+any other right, power, or remedy. Waivers of any right must be in writing and
+signed by an authorised representative of NoCorps.org build by KANAGARAJ-M to be effective, and no
+waiver shall be deemed to be a waiver of any other or subsequent right.
+
+SECTION 29 — SEVERABILITY
+
+If any provision of this Agreement is deemed invalid, illegal, or
+unenforceable by a court of competent jurisdiction, such provision shall be
+modified to the minimum extent necessary to make it enforceable. The
+remaining provisions of this Agreement shall not be affected and shall remain
+in full force and effect. If modification of the provision is not possible,
+the parties agree that the court shall sever the invalid provision and
+enforce the remainder of the Agreement to the fullest extent possible under
+applicable law in order to give effect to the parties' intent as reflected
+in the Agreement as a whole.
+
+SECTION 30 — LANGUAGE OF AGREEMENT
+
+This Agreement is written in the English language and may be translated into
+other languages for informational purposes. In the event of any conflict or
+inconsistency between the English version and any translated version, the
+English version shall prevail and be the authoritative text for all legal
+interpretations and enforcement. The English language version of this Agreement
+shall be used in all legal proceedings, arbitrations, mediations, and dispute
+resolution processes regardless of the jurisdiction in which such proceedings
+occur or the first language of the parties involved.
+
+SECTION 31 — CONTACT INFORMATION
+
+For questions about this Agreement, to report bugs, to request features, to
+provide feedback, or to contact the Author for any other reason, please visit
+the official website at nocorps.org. You may also reach NoCorps.org build by KANAGARAJ-M through
+the contact form available on the official website. NoCorps.org build by KANAGARAJ-M will make
+reasonable efforts to respond to inquiries in a timely manner but makes no
+guarantee of response time or resolution of any particular issue. Community
+members are also encouraged to participate in discussions on the official
+seng community forums and channels listed at nocorps.org.
+
+SECTION 32 — ACKNOWLEDGEMENT
+
+BY CLICKING "I AGREE", INSTALLING, COPYING, ACCESSING, OR OTHERWISE USING
+THE SOFTWARE, YOU ACKNOWLEDGE THAT: (A) YOU HAVE READ THIS AGREEMENT IN ITS
+ENTIRETY; (B) YOU UNDERSTAND ALL OF ITS TERMS AND CONDITIONS; (C) YOU AGREE
+TO BE LEGALLY BOUND BY ALL OF ITS TERMS AND CONDITIONS; AND (D) YOU ARE AT
+LEAST 13 YEARS OF AGE OR HAVE THE CONSENT OF YOUR PARENT OR GUARDIAN TO
+ENTER INTO THIS AGREEMENT.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Copyright © 2026 NoCorps.org build by KANAGARAJ-M. All Rights Reserved.
+Official Website: https://nocorps.org
+seng — Simple English Programming Language — Version 1.0.0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

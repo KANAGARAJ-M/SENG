@@ -1,0 +1,48 @@
+
+# Calculator demo — reusable functions via import
+
+note Math functions library
+define square with n
+    give back n * n
+end
+
+define cube with n
+    give back n * n * n
+end
+
+define max with a and b
+    if a is greater than b then
+        give back a
+    else
+        give back b
+    end
+end
+
+define min with a and b
+    if a is less than b then
+        give back a
+    else
+        give back b
+    end
+end
+
+define is_positive with n
+    if n is greater than 0 then
+        give back true
+    else
+        give back false
+    end
+end
+
+say "=== Calculator ==="
+say "5 squared = " + result of square with 5
+say "3 cubed   = " + result of cube with 3
+say "max(10,7) = " + result of max with 10 and 7
+say "min(10,7) = " + result of min with 10 and 7
+
+set num to 42
+if result of is_positive with num then
+    say num + " is positive"
+else
+    say num + " is not positive"
+end

@@ -1,0 +1,42 @@
+
+# Loops demo
+
+note Count from 1 to 5 using repeat
+say "Counting with repeat:"
+set i to 1
+repeat 5 times
+    say i
+    set i to i plus 1
+end
+
+note Sum numbers 1..10 using while
+say "Sum of 1 to 10:"
+set total to 0
+set n to 1
+while n is less than or equal to 10
+    set total to total plus n
+    set n to n plus 1
+end
+say "Total = " + total
+
+note Demonstrate stop (break)
+say "Numbers until we hit 7:"
+set x to 1
+while x is less than 20
+    if x is equal to 7 then
+        stop
+    end
+    say x
+    set x to x plus 1
+end
+
+note Demonstrate skip (continue)
+say "Even numbers 1-10:"
+set x to 0
+repeat 10 times
+    set x to x plus 1
+    if x mod 2 is equal to 1 then
+        skip
+    end
+    say x
+end

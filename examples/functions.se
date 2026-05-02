@@ -1,0 +1,52 @@
+
+# Functions demo
+
+note Simple greeting function
+define greet with name
+    say "Hello, " + name + "!"
+end
+
+call greet with "Alice"
+call greet with "Bob"
+
+note Function with multiple parameters and return value
+define addTwo with a and b
+    give back a plus b
+end
+
+set answer to result of addTwo with 10 and 25
+say "10 + 25 = " + answer
+
+note Fibonacci using iteration
+define fibonacci with n
+    set a to 0
+    set b to 1
+    set i to 0
+    while i is less than n
+        set temp to b
+        set b to a plus b
+        set a to temp
+        set i to i plus 1
+    end
+    give back a
+end
+
+say "Fibonacci sequence:"
+set k to 0
+repeat 10 times
+    set val to result of fibonacci with k
+    say "fib(" + k + ") = " + val
+    set k to k plus 1
+end
+
+note Check if a number is even or odd
+define check_even with num
+    if num mod 2 is equal to 0 then
+        give back "even"
+    else
+        give back "odd"
+    end
+end
+
+say "5 is " + result of check_even with 5
+say "8 is " + result of check_even with 8

@@ -1,0 +1,14 @@
+# nocorps.org/seng — Vercel / Netlify redirects
+
+# Short URLs
+/docs        /docs.html        200
+/download    /downloads/seng-setup-1.0.0-windows-x64.exe    200
+/license     /LICENSE          200
+/changelog   /CHANGELOG.md     200
+
+# Aliases
+/get         /downloads/seng-setup-1.0.0-windows-x64.exe    302
+/install     /docs.html#installation    302
+/keywords    /docs.html#keywords        302
+/examples    /docs.html#examples        302
+/contact     /docs.html#contact         302

@@ -1,0 +1,51 @@
+
+# Lists demo
+
+note Create a list and add items
+make list fruits
+add "Apple" to fruits
+add "Banana" to fruits
+add "Cherry" to fruits
+add "Mango" to fruits
+
+say "Fruits list:"
+say fruits
+
+say "Total fruits: " + length of fruits
+say "First fruit: " + item 1 of fruits
+say "Third fruit: " + item 3 of fruits
+
+note Numeric list and sum
+make list scores
+add 85 to scores
+add 92 to scores
+add 78 to scores
+add 95 to scores
+add 88 to scores
+
+set total to 0
+set i to 1
+set sz to length of scores
+while i is less than or equal to sz
+    set total to total plus item i of scores
+    set i to i plus 1
+end
+
+say "Scores: " + scores
+say "Total score: " + total
+set avg to total divided by sz
+say "Average: " + avg
+
+note List of names
+make list team
+add "Alice" to team
+add "Bob" to team
+add "Charlie" to team
+
+say "Team members:"
+set idx to 1
+set teamSize to length of team
+repeat teamSize times
+    say idx + ". " + item idx of team
+    set idx to idx plus 1
+end

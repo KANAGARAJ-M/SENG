@@ -1,0 +1,134 @@
+
+# seng Language — Implementation Summary
+
+## Architecture
+
+```mermaid
+graph LR
+    A[.se Source] --> B[Lexer]
+    B --> C[Parser]
+    C --> D[AST]
+    D --> E[Interpreter]
+    D --> F[Compiler]
+    F --> G[.sec Bytecode]
+    G --> H[VM]
+    E --> I[Output]
+    H --> I
+```
+
+## Source Files (`src/`)
+
+| File | Role |
+|------|------|
+| `common.h/c` | Memory helpers ([xmalloc](file:///c:/Users/kanag/Desktop/seng/src/common.h#16-22), [xstrdup](file:///c:/Users/kanag/Desktop/seng/src/common.h#32-39)), [read_file](file:///c:/Users/kanag/Desktop/seng/src/common.c#4-16), [fatal](file:///c:/Users/kanag/Desktop/seng/src/common.c#17-26) |
+| `lexer.h/c` | Tokenizer — produces `Token` stream from source text |
+| `ast.h/c` | AST node definitions + [node_new](file:///c:/Users/kanag/Desktop/seng/src/ast.c#12-18)/[node_free](file:///c:/Users/kanag/Desktop/seng/src/ast.c#21-60)/[node_list_push](file:///c:/Users/kanag/Desktop/seng/src/ast.c#4-11) |
+| `parser.h/c` | Recursive-descent parser — produces `ND_PROGRAM` AST |
+| `value.h/c` | Runtime values: `VAL_NUM`, `VAL_STR`, `VAL_BOOL`, `VAL_NULL`, `VAL_LIST`, `VAL_FUNC` with ref-counting |
+| `env.h/c` | Hash-map variable environment with [env_update](file:///c:/Users/kanag/Desktop/seng/src/env.c#79-98) for mutation |
+| `interp.h/c` | Tree-walk interpreter — [eval()](file:///c:/Users/kanag/Desktop/seng/src/interp.c#43-214) expressions, [exec()](file:///c:/Users/kanag/Desktop/seng/src/interp.c#225-399) statements |
+| [bytecode.h](file:///c:/Users/kanag/Desktop/seng/src/bytecode.h) | Stack VM opcode enum + `.sec` file format spec |
+| `compiler.h/c` | AST → bytecode compiler, writes `.sec` binary |
+| `vm.h/c` | Stack-based virtual machine that reads and runs `.sec` files |
+| [main.c](file:///c:/Users/kanag/Desktop/seng/src/main.c) | CLI entry point: `seng <file.se>`, `seng compile`, `seng run` |
+
+## Language Syntax
+
+### Statements
+```seng
+set x to 5                          # variable assignment
+say "Hello " + x                    # print
+ask name for "Prompt: "             # user input
+
+if x is greater than 3 then        # conditional
+    say "big"
+else
+    say "small"
+end
+
+repeat 5 times                      # fixed loop
+    say "hi"
+end
+
+while x is less than 10            # conditional loop
+    set x to x plus 1
+end
+
+define greet with name             # function definition
+    say "Hello, " + name
+end
+call greet with "Alice"            # function call (statement)
+
+give back value                    # return from function
+
+make list items                    # list creation
+add 42 to items                    # list append
+
+import "utils.se"                  # file import
+
+stop                               # break (loop)
+skip                               # continue (loop)
+```
+
+### Expressions
+```seng
+result of funcName with arg1 and arg2   # function call (expression)
+item 2 of myList                        # list access (1-indexed)
+length of myList                        # list size
+n times m                              # multiply (keyword)
+n * m                                  # multiply (operator)
+n divided by m                         # divide (keyword)
+n plus m  /  n minus m                 # add/subtract (keywords)
+n + m  /  n - m                       # add/subtract (operators)
+n mod m / n % m                       # modulo
+```
+
+### Comparisons
+```seng
+x is equal to 5
+x is not equal to 5
+x is greater than 5
+x is less than 5
+x is greater than or equal to 5
+x is less than or equal to 5
+```
+
+## Key Design Decisions
+
+> [!IMPORTANT]
+> **`times` keyword for multiply**: `n times m` works in expressions. But `repeat N times` uses [parse_primary](file:///c:/Users/kanag/Desktop/seng/src/parser.c#75-158) for N (not a full expression) to avoid the `5 times` ambiguity. Use a variable for computed repeat counts: `set cnt to x times y` then `repeat cnt times`.
+
+> [!NOTE]
+> **Scoping**: Variables are flat — `while`/`repeat`/`if` bodies share the parent env. [set](file:///c:/Users/kanag/Desktop/seng/src/env.c#45-64) uses [env_update](file:///c:/Users/kanag/Desktop/seng/src/env.c#79-98) which walks up the chain. Functions get their own scope rooted at globals (not the call site).
+
+> [!NOTE]
+> **Reserved words**: `result`, [add](file:///c:/Users/kanag/Desktop/seng/src/compiler.c#36-46), [list](file:///c:/Users/kanag/Desktop/seng/src/value.c#24-30), `item`, `length`, [of](file:///c:/Users/kanag/Desktop/seng/src/interp.c#25-30), `times`, etc. are all keywords and cannot be used as variable/function names.
+
+## .sec Binary Format
+
+```
+[4 bytes] Magic: "SENG"
+[1 byte]  Version: 1
+[4 bytes] Constant pool count
+  For each constant:
+    [1 byte]  type (0=number, 1=string)
+    [8 bytes] double  OR  [4 bytes len][N bytes string]
+[4 bytes] Instruction count
+  For each instruction:
+    [1 byte]  opcode
+    [4 bytes] int32_t operand
+```
+
+## Build
+
+```sh
+gcc -std=c99 -O2 -Isrc -o seng.exe src/*.c -lm
+```
+
+## Usage
+
+```sh
+seng hello.se              # interpret
+seng compile hello.se      # → hello.sec
+seng run hello.sec         # run bytecode
+```
