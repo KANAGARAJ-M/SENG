@@ -1,32 +1,47 @@
+<div align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&text=seng%20Language&height=200&animation=fadeIn&section=header&fontSize=60&fontAlignY=35" width="100%"/>
+</div>
 
-# seng — Simple English Programming Language
+<div align="center">
+  <img src="SENG.svg" alt="SENG Logo" width="420">
+</div>
 
-[![Build Status](https://github.com/KANAGARAJ-M/SENG/actions/workflows/build.yml/badge.svg)](https://github.com/KANAGARAJ-M/SENG/actions/workflows/build.yml)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/KANAGARAJ-M?color=ea4aaa)](https://github.com/sponsors/KANAGARAJ-M)
+<p align="center">
+  <a href="https://git.io/typing-svg">
+    <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=25&duration=4000&pause=1000&color=F70000&center=true&vCenter=true&multiline=true&random=false&width=600&height=100&lines=Simple+English+Programming;Logic+Over+Syntax;Write+the+way+you+think" alt="Typing SVG" />
+  </a>
+</p>
 
-> _Write code the way you think._
+<div align="center">
+  <img src="https://img.shields.io/github/actions/workflow/status/KANAGARAJ-M/SENG/build.yml?style=for-the-badge&logo=github-actions&logoColor=white" alt="Build Status" />
+  <img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License" />
+  <img src="https://img.shields.io/github/sponsors/KANAGARAJ-M?color=ea4aaa&style=for-the-badge&logo=github-sponsors&logoColor=white" alt="Sponsors" />
+</div>
 
-**seng** (Simple English) is a programming language designed so that even non-programmers can read, write, and understand code. Its syntax is plain English.
+<div align="center">
+  <br>
+  <img src="https://komarev.com/ghpvc/?username=KANAGARAJ-M&label=Repo%20Views&color=0e75b6&style=flat" alt="Views" />
+  <img src="https://img.shields.io/github/stars/KANAGARAJ-M/SENG?label=Stars&style=social" alt="Stars" />
+</div>
 
 ---
 
-## 🌎 Ideology, Mission & Vision
+<h2 align="center">📖 About seng</h2>
 
-### 🧩 Ideology: Logic over Syntax
-We believe that programming is a human right, not a technical privilege. The ability to instruct a computer should not depend on memorizing abstract symbols. `seng` focuses on the **logic** of your thoughts rather than the **syntax** of the machine.
+**seng** (Simple English) is a programming language designed so that even non-programmers can read, write, and understand code. Its syntax is plain English, focusing on the **logic** of your thoughts rather than the **syntax** of the machine.
 
-### 🎯 Mission: Democratizing Code
-Our mission is to provide a zero-friction entry point into software development. We aim to provide educators and self-learners with a tool that teaches "computational thinking" without the frustration of traditional coding barriers.
+<details open>
+<summary><b>🌎 Mission & Vision</b></summary>
+<br>
 
-### 🔭 Vision: Natural Language as Code
-We envision a world where anyone can create software as easily as they write an email. `seng` aims to become the global standard for introductory programming, serving as a bridge between human language and machine execution. 
-
-In the future, we envision `seng` expanding beyond basic logic to support **AI model building, data science, and complex automation**, allowing users to create sophisticated AI systems using nothing but plain English.
+- **🧩 Ideology**: Programming is a human right. We focus on computational thinking without abstract symbol barriers.
+- **🎯 Mission**: Zero-friction entry point into software development for educators and self-learners.
+- **🔭 Vision**: Natural language as the global standard for introductory programming and AI automation.
+</details>
 
 ---
 
-## 🚀 Quick Start
+<h2 align="center">🚀 Quick Start</h2>
 
 ```sh
 # Run a source file directly
@@ -41,229 +56,145 @@ seng run hello.sec
 
 ---
 
-## 📦 Building from Source (requires GCC)
+<h2 align="center">🛠️ Language Reference</h2>
 
-```sh
-gcc -std=c99 -O2 -Isrc -o seng \
-    src/common.c src/lexer.c src/ast.c src/parser.c \
-    src/value.c src/env.c src/interp.c \
-    src/compiler.c src/vm.c src/main.c -lm
-```
+<details>
+<summary><b>📝 Basics (Variables, Printing, Input)</b></summary>
 
-On Windows with MinGW:
-```sh
-gcc -std=c99 -O2 -Isrc -o seng.exe src/*.c -lm
-```
-
----
-
-## 📖 Language Reference
-
-### Comments
 ```seng
-# This is a comment
-note This is also a comment
-```
-
-### Variables
-```seng
+# Variables
 set name to "Alice"
 set age to 25
-set pi to 3.14
-set isReady to true
-set empty to nothing
-```
 
-### Printing
-```seng
-say "Hello, World!"
-say "Name: " + name
-say age
-```
+# Printing
+say "Hello, " + name
 
-### User Input
-```seng
+# Input
 ask yourName for "What is your name? "
 say "Hello, " + yourName
 ```
+</details>
 
-### Arithmetic
+<details>
+<summary><b>🔢 Arithmetic & Logic</b></summary>
+
 ```seng
-set x to 10 plus 5        # addition:    15
-set x to 10 minus 3       # subtraction:  7
-set x to 4 * 6            # multiply:    24
-set x to 20 divided by 4  # division:     5
-set x to 17 mod 3         # modulo:       2
-set x to 10 plus 3
+set x to 10 plus 5        # 15
+set x to 4 * 6            # 24
+set x to 17 mod 3         # 2
+
+if age is greater than 18 and age is less than 65 then
+    say "Adult"
+end
 ```
+</details>
 
-> **Tip:** Use `+` for string concatenation, `plus`/`minus` for arithmetic keywords, `*`/`/`/`%` as operators.
+<details>
+<summary><b>🔁 Control Flow (Loops & If)</b></summary>
 
-### Comparisons (inside `if` / `while`)
 ```seng
-age is equal to 25
-age is not equal to 30
-age is greater than 18
-age is less than 65
-age is greater than or equal to 18
-age is less than or equal to 64
-```
-
-### Logical Operators
-```seng
-if age is greater than 18 and age is less than 65 then ...
-if name is equal to "Alice" or name is equal to "Bob" then ...
-if not flag then ...
-```
-
-### If / Else
-```seng
+# If / Else
 if score is greater than 90 then
     say "A grade"
-else if score is greater than 75 then
-    say "B grade"
 else
     say "Try harder"
 end
-```
 
-### Repeat Loop
-```seng
+# Loops
 repeat 5 times
     say "Hello!"
 end
-```
 
-### While Loop
-```seng
-set count to 1
-while count is less than or equal to 10
-    say count
+while count is less than 10
     set count to count plus 1
 end
 ```
+</details>
 
-### Stop & Skip (break / continue)
-```seng
-while true
-    if x is equal to 5 then
-        stop       # break out of loop
-    end
-    if x mod 2 is equal to 0 then
-        skip       # continue to next iteration
-    end
-    set x to x plus 1
-end
-```
+<details>
+<summary><b>📦 Functions & Lists</b></summary>
 
-### Functions
 ```seng
+# Functions
 define greet with name
     say "Hello, " + name + "!"
 end
-
 call greet with "Alice"
-```
 
-```seng
-define addTwo with a and b
-    give back a plus b
-end
-
-set total to result of addTwo with 10 and 25
-say total
-```
-
-### Lists
-```seng
+# Lists
 make list fruits
 add "Apple" to fruits
-add "Banana" to fruits
-add "Cherry" to fruits
+say item 1 of fruits
+```
+</details>
 
-say fruits                         # [Apple, Banana, Cherry]
-say length of fruits               # 3
-say item 1 of fruits               # Apple  (1-indexed)
+---
+
+<h2 align="center">👨‍💻 Meet the Developer</h2>
+
+<div align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&text=Hi,%20I'm%20KANAGARAJ%20M&height=150&animation=fadeIn&section=header&fontSize=40&fontAlignY=35" width="100%"/>
+</div>
+
+```javascript
+const KANAGARAJ = {
+    location: "India 🇮🇳",
+    role: "Fullstack Developer",
+    currentFocus: "Building Web3 Future",
+    skills: {
+        languages: ["Dart", "JavaScript", "Java", "Kotlin"],
+        frameworks: ["Flutter", "React", "Express"],
+        databases: ["MongoDB", "Firebase"],
+        tools: ["Git", "VS Code", "Figma"]
+    },
+    contact: "mkrcreations.dev@gmail.com"
+};
 ```
 
-### Import
-```seng
-import "utils.se"       # runs utils.se in the current scope
-```
+<div align="center">
+  <h3>🛠️ Tech Stack</h3>
+  <img src="https://skillicons.dev/icons?i=flutter,dart,react,nodejs,express,firebase,mongodb,js,java,kotlin,git,figma,vscode&theme=dark" />
+</div>
+
+<h2 align="center">🏆 Achievements & Trophies</h2>
+
+<p align="center">
+  <img src="https://github-profile-trophy.vercel.app/?username=kanagaraj-m&theme=radical&no-frame=true&no-bg=true&row=1&column=7" width="100%" alt="Trophy" />
+</p>
 
 ---
 
-## ⚠️ Reserved Words
+<h2 align="center">📊 Project & Profile Stats</h2>
 
-The following words are part of the language syntax and cannot be used as variable or function names:
+<p align="center">
+  <img src="https://github-readme-activity-graph.vercel.app/graph?username=KANAGARAJ-M&theme=react-dark&hide_border=true&area=true" width="95%">
+</p>
 
-`add` `and` `ask` `back` `by` `call` `define` `divided` `else` `end` `equal` `for` `give` `greater` `if` `import` `is` `item` `length` `less` `list` `make` `minus` `mod` `not` `nothing` `note` `of` `or` `plus` `repeat` `result` `say` `set` `skip` `stop` `than` `then` `times` `to` `while` `with` `true` `false`
-
----
-
-## 📁 Project Structure
-
-```
-seng/
-├── src/
-│   ├── main.c        Entry point & CLI
-│   ├── lexer.c/h     Tokenizer
-│   ├── ast.h/c       AST node definitions
-│   ├── parser.c/h    Recursive-descent parser
-│   ├── value.c/h     Runtime values (num, str, bool, list, func)
-│   ├── env.c/h       Variable scoping (hash-map)
-│   ├── interp.c/h    Tree-walk interpreter
-│   ├── bytecode.h    Bytecode opcode definitions
-│   ├── compiler.c/h  AST → .sec bytecode compiler
-│   └── vm.c/h        Stack-based virtual machine
-├── examples/
-│   ├── hello.se
-│   ├── loops.se
-│   ├── functions.se
-│   ├── lists.se
-│   └── calculator.se
-├── Makefile
-└── README.md
-```
+<p align="center">
+  <img src="https://github-stats-alpha.vercel.app/api?username=KANAGARAJ-M&cc=22272e&tc=37BCF6&ic=fff&bc=0000" width="49%" />
+  <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=KANAGARAJ-M&theme=radical" width="49%" />
+</p>
 
 ---
 
-## 🔧 .sec Bytecode Format
+<h2 align="center">🤝 Connect With Me</h2>
 
-Compiled `.sec` files have the following binary format:
+<p align="center">
+  <a href="https://twitter.com/mr_kanagaraj_m">
+    <img src="https://img.shields.io/badge/Twitter-%231DA1F2.svg?style=for-the-badge&logo=Twitter&logoColor=white" alt="Twitter" />
+  </a>
+  <a href="https://www.linkedin.com/in/kanagaraj-m-b86439227/">
+    <img src="https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" />
+  </a>
+  <a href="https://www.instagram.com/kanagaraj.m_mkr/">
+    <img src="https://img.shields.io/badge/Instagram-%23E4405F.svg?style=for-the-badge&logo=Instagram&logoColor=white" alt="Instagram" />
+  </a>
+</p>
 
-| Section      | Format                                       |
-|--------------|----------------------------------------------|
-| Magic        | `SENG` (4 bytes)                             |
-| Version      | `uint8_t` (currently `1`)                    |
-| Const pool   | `uint32_t` count + typed entries             |
-| Instructions | `uint32_t` count + `(uint8_t op, int32_t arg)` pairs |
+<div align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=100&section=footer" width="100%"/>
+</div>
 
----
-
-## 💡 Philosophy
-
-- **Readable**: Code looks like plain English instructions
-- **Simple**: No symbols required for common operations  
-- **Reusable**: Functions + imports for code sharing
-- **Compiled**: Optional `.sec` bytecode for faster distribution
-
----
-
-## 🤝 Community & Contributing
-
-**seng** is now a public and open-source project! We are building a community to develop and evolve this language. Whether you're a beginner or an expert, we welcome your contributions.
-
-Check out [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
-
-## 💖 Support the Project
-
-If you find **seng** useful, please consider supporting its development through [GitHub Sponsors](https://github.com/sponsors/KANAGARAJ-M). Your support helps us maintain the project and build new features.
-
-## ⚖️ Code of Conduct
-
-We are committed to fostering a welcoming and inclusive community. Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
-
----
-
-*seng v1.0.0 — NoCorps.org build by KANAGARAJ-M*
+<p align="center">
+  <i>seng v1.0.0 — NoCorps.org built by KANAGARAJ-M</i>
+</p>
