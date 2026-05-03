@@ -42,8 +42,6 @@
 
 ---
 
----
-
 <h2 align="center">🚀 Quick Start</h2>
 
 ```sh
@@ -60,7 +58,7 @@ seng compile hello.se
 seng run examples/_secache/hello.sec
 
 # Disassemble bytecode
-seng disasm hello.sec
+seng disasm examples/_secache/hello.sec
 ```
 
 ---
@@ -109,31 +107,41 @@ else
     say "Try harder"
 end
 
-# Loops
+# Repeat Loop
 repeat 5 times
     say "Hello!"
 end
 
+# While Loop
 while count is less than 10
     set count to count plus 1
+end
+
+# For-Each Loop (v1.1.0+)
+for each fruit in ["Apple", "Banana", "Cherry"] then
+    say "I like " + fruit
 end
 ```
 </details>
 
 <details>
-<summary><b>📦 Functions & Lists</b></summary>
+<summary><b>📦 Collections (Lists & Dictionaries)</b></summary>
 
 ```seng
-# Functions
-define greet with name
-    say "Hello, " + name + "!"
-end
-call greet with "Alice"
-
-# Lists
+# Lists (v1.0.0+)
 make list fruits
 add "Apple" to fruits
 say item 1 of fruits
+# List literal (v1.1.0+)
+set myItems to ["A", "B", "C"]
+
+# Dictionaries (v1.1.0+)
+make dictionary user
+set item "name" of user to "Bob"
+set item "age" of user to 40
+say item "name" of user
+# Dictionary literal (v1.1.0+)
+set config to {"theme": "dark", "version": 1.1}
 ```
 </details>
 
@@ -180,11 +188,15 @@ end
 ```seng
 import math
 import json
-import sys
+import string
+import time
+import http
 
 say result of sqrt with 144
 set obj to result of json_parse with "{\"key\": \"val\"}"
-say result of args
+say result of format with "Hello {0}" and ["World"]
+say result of now
+set resp to result of http_get with "https://api.github.com/zen"
 ```
 </details>
 
@@ -192,69 +204,16 @@ say result of args
 
 <h2 align="center">📦 Standard Library Packages</h2>
 
-SENG v1.0.2 includes several built-in packages:
+SENG v1.1.0 expanded library:
 
-- **math** — `sqrt`, `sin`, `cos`, `random`, `pi`, etc.
+- **math** — `sqrt`, `sin`, `cos`, `random`, `pi`.
 - **sys** — `args()`, `exit()`, `sleep()`.
 - **json** — `json_parse()`, `json_stringify()`.
-- **string** — `upper()`, `lower()`, `replace()`, `split()`, `join()`.
+- **string** — `upper()`, `lower()`, `replace()`, `split()`, `join()`, `format()`.
 - **type** — `type_of()`, `to_str()`, `to_num()`.
 - **io** — `read_file()`, `write_file()`, `file_exists()`.
-
----
-
-<details>
-<summary><b>🔒 Encapsulation (Hidden Members)</b></summary>
-
-SENG provides the `hidden` keyword for private class members. These members can only be accessed within the blueprint itself (using `me`).
-
-```seng
-create blueprint BankAccount
-    hidden has balance
-    
-    define init with amount
-        set balance of me to amount
-    end
-    
-    define getBalance
-        say "Balance: " + balance of me
-    end
-end
-
-create instance of BankAccount called myAcc with 1000
-# say balance of myAcc  <-- This would fail!
-call getBalance of myAcc
-```
-</details>
-
-<details>
-<summary><b>⚠️ Error Handling (Try/Catch)</b></summary>
-
-Gracefully handle runtime errors using `try`, `catch`, and `throw`.
-
-```seng
-try
-    say "Processing..."
-    throw "Connection failed!"
-catch err
-    say "Caught error: " + err
-end
-```
-</details>
-
-<details>
-<summary><b>🛠️ Standard Library (Packages)</b></summary>
-
-Import built-in functionality for math, sys, and more.
-
-```seng
-import math
-say result of sqrt of 16  # 4
-
-import sys
-say result of args        # List of command line arguments
-```
-</details>
+- **time** (v1.1.0) — `now()`, `format_time()`.
+- **http** (v1.1.0) — `http_get()`.
 
 ---
 
@@ -270,7 +229,7 @@ const KANAGARAJ = {
     role: "Fullstack Developer",
     currentFocus: "Building Web3 Future",
     skills: {
-        languages: ["Dart", "JavaScript", "Java", "Kotlin"],
+        languages: ["Dart", "JavaScript", "Java", "Kotlin", "C"],
         frameworks: ["Flutter", "React", "Express"],
         databases: ["MongoDB", "Firebase"],
         tools: ["Git", "VS Code", "Figma"]
@@ -281,7 +240,7 @@ const KANAGARAJ = {
 
 <div align="center">
   <h3>🛠️ Tech Stack</h3>
-  <img src="https://skillicons.dev/icons?i=flutter,dart,react,nodejs,express,firebase,mongodb,js,java,kotlin,git,figma,vscode&theme=dark" />
+  <img src="https://skillicons.dev/icons?i=flutter,dart,react,nodejs,express,firebase,mongodb,js,java,kotlin,git,figma,vscode,c&theme=dark" />
 </div>
 
 <h2 align="center">🏆 Achievements & Trophies</h2>
@@ -324,5 +283,5 @@ const KANAGARAJ = {
 </div>
 
 <p align="center">
-  <i>seng v1.0.0 — NoCorps.org built by KANAGARAJ-M</i>
+  <i>seng v1.1.0 — NoCorps.org built by KANAGARAJ-M</i>
 </p>

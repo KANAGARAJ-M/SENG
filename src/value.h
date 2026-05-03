@@ -5,7 +5,7 @@
 #include "common.h"
 
 typedef enum { 
-    VAL_NUM, VAL_STR, VAL_BOOL, VAL_NULL, VAL_LIST, VAL_FUNC, VAL_NATIVE,
+    VAL_NUM, VAL_STR, VAL_BOOL, VAL_NULL, VAL_LIST, VAL_MAP, VAL_FUNC, VAL_NATIVE,
     VAL_CLASS, VAL_INSTANCE
 } ValType;
 
@@ -27,12 +27,19 @@ typedef struct SengFunc {
     void   *body_ref;  /* NodeList* in AST */
 } SengFunc;
 
-/* List value: dynamic array of Values */
 typedef struct {
     Value **items;
     int     count;
     int     cap;
 } SengList;
+
+/* Map value: string keys → Values */
+typedef struct {
+    char  **keys;
+    Value **values;
+    int     count;
+    int     cap;
+} SengMap;
 
 typedef struct SengClass {
     char   *name;
@@ -61,6 +68,7 @@ struct Value {
         char       *str;
         int         bool_val;
         SengList   *list;
+        SengMap    *map;
         SengFunc   *func;
         SengNative *native;
         SengClass  *klass;
@@ -73,6 +81,7 @@ Value *val_str   (const char *s);
 Value *val_bool  (int b);
 Value *val_null  (void);
 Value *val_list  (void);
+Value *val_map   (void);
 Value *val_func  (SengFunc *f);
 Value *val_native(SengNative *n);
 Value *val_class (SengClass *c);
@@ -84,6 +93,8 @@ int    val_is_circular(Value *v);
 
 void   val_ref  (Value *v);
 void   val_deref(Value *v);
+void   list_push(Value *list, Value *item);
+void   map_set  (Value *map, const char *key, Value *val);
 
 Value *val_copy (const Value *v);
 int    val_truthy(const Value *v);

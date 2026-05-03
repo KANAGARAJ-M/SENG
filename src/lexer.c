@@ -8,7 +8,7 @@ static const struct { const char *word; TkType type; } kw_table[] = {
     {"called",  TK_CALLED},  {"create",  TK_CREATE},  {"define",  TK_DEFINE},  {"divided", TK_DIVIDED},{"else",    TK_ELSE},
     {"end",     TK_END},     {"equal",   TK_EQUAL},  {"false",   TK_FALSE},  {"from",    TK_FROM},
     {"for",     TK_FOR},     {"give",    TK_GIVE},   {"greater", TK_GREATER}, {"has",     TK_HAS},    {"hidden",  TK_HIDDEN},
-    {"if",      TK_IF},      {"import",  TK_IMPORT}, {"instance", TK_INSTANCE}, {"is",      TK_IS},
+    {"if",      TK_IF},      {"import",  TK_IMPORT}, {"instance", TK_INSTANCE}, {"in",      TK_IN}, {"is",      TK_IS},
     {"item",    TK_ITEM},    {"length",  TK_LENGTH}, {"less",    TK_LESS},
     {"list",    TK_LIST},    {"make",    TK_MAKE},   {"me",      TK_ME},      {"minus",   TK_MINUS},
     {"mod",     TK_MOD},     {"not",     TK_NOT},    {"note",    TK_NOTE},
@@ -18,7 +18,8 @@ static const struct { const char *word; TkType type; } kw_table[] = {
     {"stop",    TK_STOP},    {"than",    TK_THAN},   {"then",    TK_THEN},
     {"times",   TK_TIMES},   {"to",      TK_TO},     {"true",    TK_TRUE},
     {"while",   TK_WHILE},   {"with",    TK_WITH},   {"try",     TK_TRY},
-    {"catch",   TK_CATCH},   {"throw",   TK_THROW},
+    {"catch",   TK_CATCH},   {"throw",   TK_THROW},  {"dictionary", TK_DICTIONARY},
+    {"each",    TK_EACH},
     {NULL,      TK_EOF}
 };
 
@@ -149,6 +150,12 @@ static Token scan(Lexer *l) {
         case '%': t.type = TK_PERCENT;  return t;
         case '(': t.type = TK_LPAREN;   return t;
         case ')': t.type = TK_RPAREN;   return t;
+        case '[': t.type = TK_LBRACK;   return t;
+        case ']': t.type = TK_RBRACK;   return t;
+        case '{': t.type = TK_LBRACE;   return t;
+        case '}': t.type = TK_RBRACE;   return t;
+        case ':': t.type = TK_COLON;    return t;
+        case ',': t.type = TK_COMMA;    return t;
         default:
             t.type = TK_ERROR; return t;
     }
@@ -175,11 +182,11 @@ const char *tk_name(TkType t) {
     static const char *names[] = {
         "NUMBER","STRING","TRUE","FALSE","NOTHING","IDENT",
         "add","and","ask","back","blueprint","by","call","called","create","define","divided",
-        "else","end","equal","from","for","give","greater","has","if","import",
+        "else","end","equal","from","for","each","in","give","greater","has","if","import",
         "instance","is","item","hidden","length","less","list","make","me","minus","mod",
-        "not","note","of","or","plus","repeat","result","say","set",
+        "not","note","dictionary", "of","or","plus","repeat","result","say","set",
         "skip","stop","than","then","times","to","while","with","try","catch","throw",
-        "+","-","*","/","%","(",")",
+        "+","-","*","/","%","(",")","[","]","{","}",":",",",
         "NEWLINE","EOF","ERROR"
     };
     if (t < TK_COUNT) return names[t];

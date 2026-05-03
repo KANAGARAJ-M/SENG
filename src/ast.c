@@ -85,6 +85,19 @@ void node_free(Node *n) {
         case ND_THROW:
             node_free(n->throw_err.expr);
             break;
+        case ND_MAKE_MAP:
+            free(n->map_name);
+            break;
+        case ND_FOR_EACH:
+            free(n->for_each.var_name);
+            node_free(n->for_each.collection);
+            node_list_free(&n->for_each.body);
+            break;
+        case ND_SET_ITEM:
+            free(n->set_item.name);
+            node_free(n->set_item.index);
+            node_free(n->set_item.val);
+            break;
         case ND_ME: break;
         default: break;
     }

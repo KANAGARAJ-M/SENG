@@ -480,8 +480,13 @@ void vm_run_file(const char *path) {
 
             case OP_LIST_NEW: {
                 Value *v = val_list();
-                env_set(cur_env, pool_str[arg], v);
-                val_deref(v);
+                const char *nm = pool_str[arg];
+                if (nm[0] == '\0') {
+                    push(&stk, v);
+                } else {
+                    env_set(cur_env, nm, v);
+                    val_deref(v);
+                }
                 break;
             }
             case OP_LIST_PUSH: {
@@ -500,14 +505,23 @@ void vm_run_file(const char *path) {
             }
             case OP_LIST_GET: {
                 Value *idx_v = pop(&stk);
-                int    idx   = (int)idx_v->num - 1; /* 1-based */
-                val_deref(idx_v);
                 Value *lv = env_get(cur_env, pool_str[arg]);
-                if (!lv || lv->type != VAL_LIST)
-                    fatal("'%s' is not a list", pool_str[arg]);
-                if (idx < 0 || idx >= lv->list->count)
-                    fatal("list index out of range");
-                push(&stk, val_copy(lv->list->items[idx]));
+                if (!lv) fatal("undefined collection '%s'", pool_str[arg]);
+                if (lv->type == VAL_LIST) {
+                    int idx = (int)idx_v->num - 1;
+                    if (idx < 0 || idx >= lv->list->count) fatal("list index out of range");
+                    push(&stk, val_copy(lv->list->items[idx]));
+                } else if (lv->type == VAL_MAP) {
+                    if (idx_v->type != VAL_STR) fatal("map key must be a string");
+                    Value *res = val_null();
+                    for (int i = 0; i < lv->map->count; i++) {
+                        if (strcmp(lv->map->keys[i], idx_v->str) == 0) {
+                            res = val_copy(lv->map->values[i]); break;
+                        }
+                    }
+                    push(&stk, res);
+                } else fatal("not a list or dictionary");
+                val_deref(idx_v);
                 break;
             }
             case OP_LIST_LEN: {
@@ -695,6 +709,93 @@ void vm_run_file(const char *path) {
                 }
                 break;
             }
+            case OP_MAP_NEW: {
+                Value *m = val_map();
+                const char *nm = pool_str[arg];
+                if (nm[0] == '\0') {
+                    push(&stk, m);
+                } else {
+                    env_set(cur_env, nm, m);
+                    val_deref(m);
+                }
+                break;
+            }
+            case OP_SET_ITEM: {
+                Value *val = pop(&stk);
+                Value *idx = pop(&stk);
+                Value *col = pop(&stk);
+                if (!col) fatal("undefined collection");
+                if (col->type == VAL_LIST) {
+                    int i = (int)idx->num - 1;
+                    if (i < 0 || i >= col->list->count) fatal("list index out of bounds");
+                    val_deref(col->list->items[i]);
+                    col->list->items[i] = val;
+                } else if (col->type == VAL_MAP) {
+                    if (idx->type != VAL_STR) fatal("map key must be a string");
+                    int found = 0;
+                    for (int i = 0; i < col->map->count; i++) {
+                        if (strcmp(col->map->keys[i], idx->str) == 0) {
+                            val_deref(col->map->values[i]);
+                            col->map->values[i] = val;
+                            found = 1; break;
+                        }
+                    }
+                    if (!found) {
+                        if (col->map->count >= col->map->cap) {
+                            col->map->cap = col->map->cap ? col->map->cap * 2 : 4;
+                            col->map->keys = (char **)xrealloc(col->map->keys, sizeof(char *) * (size_t)col->map->cap);
+                            col->map->values = (Value **)xrealloc(col->map->values, sizeof(Value *) * (size_t)col->map->cap);
+                        }
+                        col->map->keys[col->map->count] = xstrdup(idx->str);
+                        col->map->values[col->map->count] = val;
+                        col->map->count++;
+                    }
+                } else fatal("not a list or dictionary");
+                val_deref(idx);
+                val_deref(col);
+                break;
+            }
+            case OP_ITER_START: {
+                push(&stk, val_num(0.0));
+                break;
+            }
+            case OP_ITER_NEXT: {
+                Value *idx_v = pop(&stk);
+                Value *col   = stk.data[stk.top - 1];
+                int i = (int)idx_v->num;
+                int len = 0;
+                if (col->type == VAL_LIST) len = col->list->count;
+                else if (col->type == VAL_MAP) len = col->map->count;
+                else fatal("ITER_NEXT on non-collection type");
+
+                if (i >= len) {
+                    pc = arg;
+                    val_deref(idx_v);
+                } else {
+                    Value *val = (col->type == VAL_LIST) ? col->list->items[i] : col->map->values[i];
+                    push(&stk, val_num((double)(i + 1)));
+                    push(&stk, val_copy(val));
+                    val_deref(idx_v);
+                }
+                break;
+            }
+            case OP_LIST_PUSH_STACK: {
+                Value *val = pop(&stk);
+                Value *col = stk.data[stk.top - 1];
+                if (!col || col->type != VAL_LIST) fatal("not a list");
+                list_push(col, val);
+                break;
+            }
+            case OP_MAP_SET_STACK: {
+                Value *val = pop(&stk);
+                Value *key = pop(&stk);
+                Value *col = stk.data[stk.top - 1];
+                if (!col || col->type != VAL_MAP) fatal("not a dictionary");
+                if (key->type != VAL_STR) fatal("key must be a string");
+                map_set(col, key->str, val);
+                val_deref(key);
+                break;
+            }
 
             default:
                 fatal("unknown opcode %d", op);
@@ -718,7 +819,8 @@ static const char *op_names[] = {
     "AND", "OR", "PRINT", "INPUT", "JUMP", "JUMP_FALSE", "CALL", "RET", "HALT",
     "LIST_NEW", "LIST_PUSH", "LIST_GET", "LIST_LEN", "POP",
     "DEF_FUNC", "CLASS_DEF", "NEW_INST", "GET_PROP", "SET_PROP", "ME", "METHOD_CALL",
-    "TRY", "THROW", "END_TRY", "IMPORT"
+    "TRY", "THROW", "END_TRY", "IMPORT", "MAP_NEW", "SET_ITEM", "ITER_START", "ITER_NEXT",
+    "LIST_PUSH_STACK", "MAP_SET_STACK"
 };
 
 void vm_disasm(const char *path) {

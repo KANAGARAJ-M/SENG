@@ -127,6 +127,23 @@ static void compile_expr(Ctx *c, Node *n) {
             compile_expr(c, n->list_get.index);
             emit(c, OP_LIST_GET, pool_add_str(c, n->list_get.name));
             break;
+        
+        case ND_LIST_LIT:
+            emit(c, OP_LIST_NEW, pool_add_str(c, "")); // temp list
+            for (int i = 0; i < n->list_lit.count; i++) {
+                compile_expr(c, n->list_lit.items[i]);
+                emit(c, OP_LIST_PUSH_STACK, 0);
+            }
+            break;
+
+        case ND_MAP_LIT:
+            emit(c, OP_MAP_NEW, pool_add_str(c, "")); // temp map
+            for (int i = 0; i < n->map_lit.count; i += 2) {
+                compile_expr(c, n->map_lit.items[i]);
+                compile_expr(c, n->map_lit.items[i+1]);
+                emit(c, OP_MAP_SET_STACK, 0);
+            }
+            break;
 
         case ND_CALL_EXPR:
             if (n->call.obj) {
@@ -355,6 +372,33 @@ static void compile_node(Ctx *c, Node *n) {
             compile_expr(c, n->add_list.val);
             emit(c, OP_LIST_PUSH, pool_add_str(c, n->add_list.name));
             break;
+        
+        case ND_MAKE_MAP:
+            emit(c, OP_MAP_NEW, pool_add_str(c, n->map_name));
+            break;
+        
+        case ND_SET_ITEM:
+            emit(c, OP_LOAD, pool_add_str(c, n->set_item.name));
+            compile_expr(c, n->set_item.index);
+            compile_expr(c, n->set_item.val);
+            emit(c, OP_SET_ITEM, 0);
+            break;
+
+        case ND_FOR_EACH: {
+            compile_expr(c, n->for_each.collection);
+            emit(c, OP_ITER_START, 0);
+            int loop_start = c->code_count;
+            int exit_jmp = emit(c, OP_ITER_NEXT, 0);
+            
+            emit(c, OP_STORE, pool_add_str(c, n->for_each.var_name));
+            compile_block(c, &n->for_each.body);
+            
+            emit(c, OP_JUMP, loop_start);
+            patch(c, exit_jmp, c->code_count);
+            
+            emit(c, OP_POP, 0); // pop collection
+            break;
+        }
 
         case ND_STOP:  emit(c, OP_JUMP, -1); break;  /* -1 = break sentinel */
         case ND_SKIP:  emit(c, OP_JUMP, -2); break;  /* -2 = continue sentinel */

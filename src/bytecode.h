@@ -62,6 +62,12 @@ typedef enum {
     OP_THROW,       /* pop error value and jump to current catch         */
     OP_END_TRY,     /* pop catch frame                                   */
     OP_IMPORT,      /* op=package-name-index                             */
+    OP_MAP_NEW,     /* new map, store in constants[op]                  */
+    OP_SET_ITEM,    /* col, idx, val on stack                           */
+    OP_ITER_START,  /* push iterator for collection on stack            */
+    OP_ITER_NEXT,   /* op=jump-if-done. pop iter; push val; push next-iter */
+    OP_LIST_PUSH_STACK, /* pop val; pop list; push back list            */
+    OP_MAP_SET_STACK,   /* pop val; pop key; pop map; push back map     */
     OP_COUNT
 } Opcode;
 

@@ -28,16 +28,6 @@ static Value *val_strn(const char *s, size_t n) {
     return v;
 }
 
-static void list_push(Value *list, Value *item) {
-    SengList *sl = list->list;
-    if (sl->count >= sl->cap) {
-        sl->cap   = sl->cap ? sl->cap * 2 : 4;
-        sl->items = (Value **)xrealloc(sl->items,
-                    sizeof(Value *) * (size_t)sl->cap);
-    }
-    sl->items[sl->count++] = item;
-}
-
 static void require_num(Value *v, int pos, const char *fn) {
     if (!v || v->type != VAL_NUM)
         fatal("'%s': argument %d must be a number", fn, pos);
@@ -143,6 +133,38 @@ static void pkg_math(Env *g) {
     Value *pi = val_num(3.14159265358979323846);
     env_set(g, "pi", pi);
     val_deref(pi);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   time package
+   ═══════════════════════════════════════════════════════════════ */
+
+static Value *nat_now(Value **a, int n) {
+    (void)a; (void)n;
+    return val_num((double)time(NULL));
+}
+static Value *nat_format_time(Value **a, int n) {
+    (void)n; require_num(a[0],1,"format_time");
+    time_t t = (time_t)a[0]->num;
+    struct tm *info = localtime(&t);
+    char buf[128];
+    if (!info) return val_str("invalid time");
+    strftime(buf, sizeof buf, "%Y-%m-%d %H:%M:%S", info);
+    return val_str(buf);
+}
+
+static SengNative time_fns[] = {
+    {"now",         nat_now,         0},
+    {"format_time", nat_format_time, 1},
+    {NULL, NULL, 0}
+};
+
+static void pkg_time(Env *g) {
+    for (int i = 0; time_fns[i].name; i++) {
+        Value *v = val_native(&time_fns[i]);
+        env_set(g, time_fns[i].name, v);
+        val_deref(v);
+    }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -304,6 +326,32 @@ static Value *nat_sub_str(Value **a, int n) {
     return val_strn(a[0]->str + start, (size_t)(end - start));
 }
 
+static Value *nat_format(Value **a, int n) {
+    (void)n; require_str(a[0],1,"format"); require_list(a[1],2,"format");
+    const char *fmt = a[0]->str;
+    SengList *args = a[1]->list;
+    size_t cap = strlen(fmt) + 128, len = 0;
+    char *res = xmalloc(cap); res[0] = '\0';
+    for (const char *p = fmt; *p; ) {
+        if (*p == '{' && isdigit(*(p+1))) {
+            char *end;
+            int idx = (int)strtol(p + 1, &end, 10);
+            if (*end == '}') {
+                if (idx >= 0 && idx < args->count) {
+                    char *s = val_to_string(args->items[idx]);
+                    size_t slen = strlen(s);
+                    if (len + slen + 1 > cap) { cap = len + slen + 128; res = xrealloc(res, cap); }
+                    strcpy(res + len, s); len += slen;
+                    free(s); p = end + 1; continue;
+                }
+            }
+        }
+        if (len + 2 > cap) { cap *= 2; res = xrealloc(res, cap); }
+        res[len++] = *p++; res[len] = '\0';
+    }
+    Value *v = val_str(res); free(res); return v;
+}
+
 static SengNative str_fns[] = {
     {"str_len",    nat_str_len,    1},
     {"upper",      nat_upper,      1},
@@ -320,6 +368,7 @@ static SengNative str_fns[] = {
     {"str_repeat", nat_str_repeat, 2},
     {"char_at",    nat_char_at,    2},
     {"sub_str",    nat_sub_str,    3},
+    {"format",     nat_format,     2},
     {NULL, NULL, 0}
 };
 
@@ -598,8 +647,23 @@ static Value *nat_http_get(Value **a, int n) {
     char *body = wininet_request(a[0]->str, "GET", NULL, NULL, 0);
     if (!body) fatal("'http_get': request failed for '%s'", a[0]->str);
     Value *v = val_str(body); free(body); return v;
+    Value *v = val_str(body); free(body); return v;
 #else
-    fatal("'http_get': HTTP not supported on this platform"); return val_null();
+    char cmd[2048];
+    snprintf(cmd, sizeof cmd, "curl -s \"%s\"", a[0]->str);
+    FILE *fp = popen(cmd, "r");
+    if (!fp) fatal("'http_get': curl failed");
+    char *res = NULL; size_t rlen = 0, rcap = 0;
+    char buf[1024];
+    while (fgets(buf, sizeof buf, fp)) {
+        size_t blen = strlen(buf);
+        if (rlen + blen + 1 > rcap) { rcap = rcap ? rcap * 2 : 1024; res = xrealloc(res, rcap); }
+        if (rlen == 0) res[0] = '\0';
+        strcat(res, buf); rlen += blen;
+    }
+    pclose(fp);
+    if (!res) res = xstrdup("");
+    Value *v = val_str(res); free(res); return v;
 #endif
 }
 static Value *nat_http_post(Value **a, int n) {
@@ -609,8 +673,23 @@ static Value *nat_http_post(Value **a, int n) {
     char *resp = wininet_request(a[0]->str, "POST", hdrs, a[1]->str, strlen(a[1]->str));
     if (!resp) fatal("'http_post': request failed for '%s'", a[0]->str);
     Value *v = val_str(resp); free(resp); return v;
+    Value *v = val_str(resp); free(resp); return v;
 #else
-    fatal("'http_post': HTTP not supported on this platform"); return val_null();
+    char cmd[4096];
+    snprintf(cmd, sizeof cmd, "curl -s -X POST -d '%s' \"%s\"", a[1]->str, a[0]->str);
+    FILE *fp = popen(cmd, "r");
+    if (!fp) fatal("'http_post': curl failed");
+    char *res = NULL; size_t rlen = 0, rcap = 0;
+    char buf[1024];
+    while (fgets(buf, sizeof buf, fp)) {
+        size_t blen = strlen(buf);
+        if (rlen + blen + 1 > rcap) { rcap = rcap ? rcap * 2 : 1024; res = xrealloc(res, rcap); }
+        if (rlen == 0) res[0] = '\0';
+        strcat(res, buf); rlen += blen;
+    }
+    pclose(fp);
+    if (!res) res = xstrdup("");
+    Value *v = val_str(res); free(res); return v;
 #endif
 }
 static Value *nat_http_post_json(Value **a, int n) {
@@ -620,8 +699,23 @@ static Value *nat_http_post_json(Value **a, int n) {
     char *resp = wininet_request(a[0]->str, "POST", hdrs, a[1]->str, strlen(a[1]->str));
     if (!resp) fatal("'http_post_json': request failed for '%s'", a[0]->str);
     Value *v = val_str(resp); free(resp); return v;
+    Value *v = val_str(resp); free(resp); return v;
 #else
-    fatal("'http_post_json': HTTP not supported on this platform"); return val_null();
+    char cmd[4096];
+    snprintf(cmd, sizeof cmd, "curl -s -X POST -H 'Content-Type: application/json' -d '%s' \"%s\"", a[1]->str, a[0]->str);
+    FILE *fp = popen(cmd, "r");
+    if (!fp) fatal("'http_post_json': curl failed");
+    char *res = NULL; size_t rlen = 0, rcap = 0;
+    char buf[1024];
+    while (fgets(buf, sizeof buf, fp)) {
+        size_t blen = strlen(buf);
+        if (rlen + blen + 1 > rcap) { rcap = rcap ? rcap * 2 : 1024; res = xrealloc(res, rcap); }
+        if (rlen == 0) res[0] = '\0';
+        strcat(res, buf); rlen += blen;
+    }
+    pclose(fp);
+    if (!res) res = xstrdup("");
+    Value *v = val_str(res); free(res); return v;
 #endif
 }
 static Value *nat_http_put(Value **a, int n) {
@@ -631,8 +725,23 @@ static Value *nat_http_put(Value **a, int n) {
     char *resp = wininet_request(a[0]->str, "PUT", hdrs, a[1]->str, strlen(a[1]->str));
     if (!resp) fatal("'http_put': request failed for '%s'", a[0]->str);
     Value *v = val_str(resp); free(resp); return v;
+    Value *v = val_str(resp); free(resp); return v;
 #else
-    fatal("'http_put': HTTP not supported on this platform"); return val_null();
+    char cmd[4096];
+    snprintf(cmd, sizeof cmd, "curl -s -X PUT -d '%s' \"%s\"", a[1]->str, a[0]->str);
+    FILE *fp = popen(cmd, "r");
+    if (!fp) fatal("'http_put': curl failed");
+    char *res = NULL; size_t rlen = 0, rcap = 0;
+    char buf[1024];
+    while (fgets(buf, sizeof buf, fp)) {
+        size_t blen = strlen(buf);
+        if (rlen + blen + 1 > rcap) { rcap = rcap ? rcap * 2 : 1024; res = xrealloc(res, rcap); }
+        if (rlen == 0) res[0] = '\0';
+        strcat(res, buf); rlen += blen;
+    }
+    pclose(fp);
+    if (!res) res = xstrdup("");
+    Value *v = val_str(res); free(res); return v;
 #endif
 }
 static Value *nat_http_delete(Value **a, int n) {
@@ -641,8 +750,23 @@ static Value *nat_http_delete(Value **a, int n) {
     char *resp = wininet_request(a[0]->str, "DELETE", NULL, NULL, 0);
     if (!resp) fatal("'http_delete': request failed for '%s'", a[0]->str);
     Value *v = val_str(resp); free(resp); return v;
+    Value *v = val_str(resp); free(resp); return v;
 #else
-    fatal("'http_delete': HTTP not supported on this platform"); return val_null();
+    char cmd[2048];
+    snprintf(cmd, sizeof cmd, "curl -s -X DELETE \"%s\"", a[0]->str);
+    FILE *fp = popen(cmd, "r");
+    if (!fp) fatal("'http_delete': curl failed");
+    char *res = NULL; size_t rlen = 0, rcap = 0;
+    char buf[1024];
+    while (fgets(buf, sizeof buf, fp)) {
+        size_t blen = strlen(buf);
+        if (rlen + blen + 1 > rcap) { rcap = rcap ? rcap * 2 : 1024; res = xrealloc(res, rcap); }
+        if (rlen == 0) res[0] = '\0';
+        strcat(res, buf); rlen += blen;
+    }
+    pclose(fp);
+    if (!res) res = xstrdup("");
+    Value *v = val_str(res); free(res); return v;
 #endif
 }
 
@@ -1056,5 +1180,6 @@ int pkg_register(Env *globals, const char *name) {
     if (strcmp(name, "http")   == 0) { pkg_http(globals);   return 1; }
     if (strcmp(name, "sys")    == 0) { pkg_sys(globals);    return 1; }
     if (strcmp(name, "json")   == 0) { pkg_json(globals);   return 1; }
+    if (strcmp(name, "time")   == 0) { pkg_time(globals);   return 1; }
     return 0;
 }

@@ -108,6 +108,39 @@ static Node *parse_primary(Parser *p) {
         return n;
     }
 
+    /* [ list literal ] */
+    if (tk.type == TK_LBRACK) {
+        p_advance(p);
+        Node *n = node_new(ND_LIST_LIT, ln);
+        if (!p_check(p, TK_RBRACK)) {
+            node_list_push(&n->list_lit, parse_expr(p));
+            while (p_match(p, TK_COMMA))
+                node_list_push(&n->list_lit, parse_expr(p));
+        }
+        p_expect(p, TK_RBRACK);
+        return n;
+    }
+
+    /* { map literal } */
+    if (tk.type == TK_LBRACE) {
+        p_advance(p);
+        Node *n = node_new(ND_MAP_LIT, ln);
+        if (!p_check(p, TK_RBRACE)) {
+            // key
+            node_list_push(&n->map_lit, parse_expr(p));
+            p_expect(p, TK_COLON);
+            // value
+            node_list_push(&n->map_lit, parse_expr(p));
+            while (p_match(p, TK_COMMA)) {
+                node_list_push(&n->map_lit, parse_expr(p));
+                p_expect(p, TK_COLON);
+                node_list_push(&n->map_lit, parse_expr(p));
+            }
+        }
+        p_expect(p, TK_RBRACE);
+        return n;
+    }
+
     /* length of <list> */
     if (tk.type == TK_LENGTH) {
         p_advance(p);
@@ -340,6 +373,22 @@ static Node *parse_stmt(Parser *p) {
     /* ── set ── */
     if (tk.type == TK_SET) {
         p_advance(p);
+        
+        /* set item <idx> of <name> to <val> */
+        if (p_match(p, TK_ITEM)) {
+            Node *idx = parse_expr(p);
+            p_expect(p, TK_OF);
+            Token nm = p_expect(p, TK_IDENT);
+            p_expect(p, TK_TO);
+            Node *val = parse_expr(p);
+            eat_newline(p);
+            Node *n = node_new(ND_SET_ITEM, ln);
+            n->set_item.name  = nm.value;
+            n->set_item.index = idx;
+            n->set_item.val   = val;
+            return n;
+        }
+
         /* set <ident> [of <obj>] to <expr> */
         Token nm = p_expect(p, TK_IDENT);
         if (p_match(p, TK_OF)) {
@@ -448,6 +497,25 @@ static Node *parse_stmt(Parser *p) {
         return n;
     }
 
+    /* ── for each ── */
+    if (tk.type == TK_FOR) {
+        p_advance(p);
+        p_expect(p, TK_EACH);
+        Token var = p_expect(p, TK_IDENT);
+        p_expect(p, TK_IN);
+        Node *collection = parse_expr(p);
+        p_expect(p, TK_THEN);
+        eat_newline(p);
+        NodeList body = parse_block(p);
+        p_expect(p, TK_END);
+        eat_newline(p);
+        Node *n = node_new(ND_FOR_EACH, ln);
+        n->for_each.var_name = var.value;
+        n->for_each.collection = collection;
+        n->for_each.body = body;
+        return n;
+    }
+
     /* ── while ── */
     if (tk.type == TK_WHILE) {
         p_advance(p);
@@ -517,15 +585,23 @@ static Node *parse_stmt(Parser *p) {
         return n;
     }
 
-    /* ── make list ── */
+    /* ── make list/dictionary ── */
     if (tk.type == TK_MAKE) {
         p_advance(p);
-        p_expect(p, TK_LIST);
-        Token nm = p_expect(p, TK_IDENT);
-        eat_newline(p);
-        Node *n = node_new(ND_MAKE_LIST, ln);
-        n->list_name = nm.value;
-        return n;
+        if (p_match(p, TK_LIST)) {
+            Token nm = p_expect(p, TK_IDENT);
+            eat_newline(p);
+            Node *n = node_new(ND_MAKE_LIST, ln);
+            n->list_name = nm.value;
+            return n;
+        } else if (p_match(p, TK_DICTIONARY)) {
+            Token nm = p_expect(p, TK_IDENT);
+            eat_newline(p);
+            Node *n = node_new(ND_MAKE_MAP, ln);
+            n->map_name = nm.value;
+            return n;
+        }
+        fatal("line %d: expected 'list' or 'dictionary' after 'make'", ln);
     }
 
     /* ── add <val> to <list> ── */

@@ -25,6 +25,11 @@ typedef enum {
     ND_SKIP,      /* skip  (continue)           */
     ND_TRY,       /* try ... catch ...          */
     ND_THROW,     /* throw <expr>               */
+    ND_MAKE_MAP,  /* make dictionary x          */
+    ND_FOR_EACH,  /* for each x in y ...        */
+    ND_SET_ITEM,  /* set item i of x to v       */
+    ND_LIST_LIT,  /* [v1, v2, ...]              */
+    ND_MAP_LIT,   /* {k1:v1, k2:v2, ...}        */
     /* expressions */
     ND_NUMBER,    /* 3.14                       */
     ND_STRING,    /* "hello"                    */
@@ -152,6 +157,24 @@ struct Node {
         struct {
             Node *expr;
         } throw_err;
+        /* ND_MAKE_MAP */
+        char *map_name;
+        /* ND_FOR_EACH */
+        struct {
+            char     *var_name;
+            Node     *collection;
+            NodeList  body;
+        } for_each;
+        /* ND_SET_ITEM */
+        struct {
+            char *name;
+            Node *index;
+            Node *val;
+        } set_item;
+        /* ND_LIST_LIT */
+        NodeList list_lit;
+        /* ND_MAP_LIT (interleaved keys and values) */
+        NodeList map_lit;
     };
 };
 

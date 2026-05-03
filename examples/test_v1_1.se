@@ -1,0 +1,56 @@
+import math
+import string
+import time
+import http
+import json
+
+say "--- Testing v1.1.0 Features ---"
+
+# 1. Dictionaries
+say "Testing Dictionaries..."
+make dictionary user
+set item "name" of user to "Alice"
+set item "age" of user to 30
+say "User name: " plus item "name" of user
+say "User age: " plus item "age" of user
+say "User object: " plus user
+
+# 2. For-Each Loops
+say ""
+say "Testing For-Each (List)..."
+make list fruits
+add "Apple" to fruits
+add "Banana" to fruits
+add "Cherry" to fruits
+for each f in fruits then
+    say "Fruit: " plus f
+end
+
+say ""
+say "Testing For-Each (Dictionary)..."
+for each v in user then
+    say "Value in user: " plus v
+end
+
+# 3. String Formatting
+say ""
+say "Testing String Formatting..."
+set msg to result of format with "Hello {0}, you are {1} years old." and ["Bob", 40]
+say msg
+
+# 4. Time Package
+say ""
+say "Testing Time Package..."
+set t to result of now
+say "Current timestamp: " plus t
+say "Formatted time: " plus result of format_time with t
+
+# 5. Linux HTTP (if online)
+say ""
+say "Testing HTTP GET (Linux/Windows)..."
+try
+    set resp to result of http_get with "https://api.github.com/zen"
+    say "GitHub Zen: " plus resp
+catch err
+    say "HTTP Error (expected if offline): " plus err
+end

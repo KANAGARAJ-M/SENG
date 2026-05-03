@@ -29,6 +29,13 @@ Value *val_list(void) {
     return v;
 }
 
+Value *val_map(void) {
+    Value   *v = val_alloc(VAL_MAP);
+    SengMap *m = (SengMap *)xcalloc(1, sizeof(SengMap));
+    v->map = m;
+    return v;
+}
+
 Value *val_class(SengClass *c) {
     Value *v = val_alloc(VAL_CLASS);
     v->klass = c;
@@ -50,6 +57,15 @@ void val_deref(Value *v) {
         for (int i = 0; i < v->list->count; i++) val_deref(v->list->items[i]);
         free(v->list->items);
         free(v->list);
+    }
+    if (v->type == VAL_MAP) {
+        for (int i = 0; i < v->map->count; i++) {
+            free(v->map->keys[i]);
+            val_deref(v->map->values[i]);
+        }
+        free(v->map->keys);
+        free(v->map->values);
+        free(v->map);
     }
     if (v->type == VAL_FUNC) {
         SengFunc *fn = v->func;
@@ -93,6 +109,7 @@ int val_truthy(const Value *v) {
         case VAL_STR:    return v->str && v->str[0] != '\0';
         case VAL_NULL:   return 0;
         case VAL_LIST:   return v->list->count > 0;
+        case VAL_MAP:    return v->map->count > 0;
         case VAL_NATIVE: return 1;
         default:         return 1;
     }
@@ -130,7 +147,7 @@ static char *vts_rec(const Value *v, Value **stack, int depth) {
     if (!v) return xstrdup("nothing");
     if (depth > 32) return xstrdup("...");
     for (int i = 0; i < depth; i++) {
-        if (stack[i] == v) return xstrdup(v->type == VAL_LIST ? "[...]" : "<...>");
+        if (stack[i] == v) return xstrdup(v->type == VAL_LIST ? "[...]" : (v->type == VAL_MAP ? "{...}" : "<...>"));
     }
     stack[depth] = (Value *)v;
 
@@ -178,6 +195,18 @@ static char *vts_rec(const Value *v, Value **stack, int depth) {
             append_str(&res, "]");
             return res;
         }
+        case VAL_MAP: {
+            char *res = xstrdup("{");
+            for (int i = 0; i < v->map->count; i++) {
+                append_str(&res, v->map->keys[i]);
+                append_str(&res, ": ");
+                char *s = vts_rec(v->map->values[i], stack, depth + 1);
+                append_str(&res, s); free(s);
+                if (i < v->map->count - 1) append_str(&res, ", ");
+            }
+            append_str(&res, "}");
+            return res;
+        }
         default: return xstrdup("?");
     }
 }
@@ -223,4 +252,34 @@ Value *val_copy(const Value *src) {
     if (!src) return val_null();
     val_ref((Value *)src);
     return (Value *)src;
+}
+
+void list_push(Value *v, Value *item) {
+    if (!v || v->type != VAL_LIST) return;
+    SengList *l = v->list;
+    if (l->count >= l->cap) {
+        l->cap = l->cap ? l->cap * 2 : 4;
+        l->items = (Value **)xrealloc(l->items, sizeof(Value *) * (size_t)l->cap);
+    }
+    l->items[l->count++] = item;
+}
+
+void map_set(Value *v, const char *key, Value *val) {
+    if (!v || v->type != VAL_MAP) return;
+    SengMap *m = v->map;
+    for (int i = 0; i < m->count; i++) {
+        if (strcmp(m->keys[i], key) == 0) {
+            val_deref(m->values[i]);
+            m->values[i] = val;
+            return;
+        }
+    }
+    if (m->count >= m->cap) {
+        m->cap = m->cap ? m->cap * 2 : 4;
+        m->keys = (char **)xrealloc(m->keys, sizeof(char *) * (size_t)m->cap);
+        m->values = (Value **)xrealloc(m->values, sizeof(Value *) * (size_t)m->cap);
+    }
+    m->keys[m->count] = xstrdup(key);
+    m->values[m->count] = val;
+    m->count++;
 }

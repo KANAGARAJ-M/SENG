@@ -228,15 +228,29 @@ static Value *eval(Interp *in, Env *e, Node *n) {
 
         case ND_LIST_GET: {
             Value *v = env_get(e, n->list_get.name);
-            if (!v || v->type != VAL_LIST)
-                fatal("line %d: '%s' is not a list", n->line, n->list_get.name);
+            if (!v) fatal("line %d: undefined collection '%s'", n->line, n->list_get.name);
             Value *idx_v = eval(in, e, n->list_get.index);
-            int    idx   = (int)num_of(idx_v, n->line) - 1; /* 1-based */
-            val_deref(idx_v);
-            if (idx < 0 || idx >= v->list->count)
-                fatal("line %d: list index %d out of range (size %d)",
-                      n->line, idx + 1, v->list->count);
-            return val_copy(v->list->items[idx]);
+            if (v->type == VAL_LIST) {
+                int idx = (int)num_of(idx_v, n->line) - 1; /* 1-based */
+                val_deref(idx_v);
+                if (idx < 0 || idx >= v->list->count)
+                    fatal("line %d: list index %d out of range (size %d)",
+                          n->line, idx + 1, v->list->count);
+                return val_copy(v->list->items[idx]);
+            } else if (v->type == VAL_MAP) {
+                if (idx_v->type != VAL_STR) fatal("line %d: map key must be a string", n->line);
+                Value *res = val_null();
+                for (int i = 0; i < v->map->count; i++) {
+                    if (strcmp(v->map->keys[i], idx_v->str) == 0) {
+                        res = val_copy(v->map->values[i]); break;
+                    }
+                }
+                val_deref(idx_v);
+                return res;
+            } else {
+                fatal("line %d: '%s' is not a list or dictionary", n->line, n->list_get.name);
+                return val_null();
+            }
         }
 
         case ND_PROP_GET: {
@@ -263,6 +277,27 @@ static Value *eval(Interp *in, Env *e, Node *n) {
             Value *v = env_get(e, "me");
             if (!v) fatal("line %d: 'me' can only be used inside a blueprint method", n->line);
             return val_copy(v);
+        }
+
+        case ND_LIST_LIT: {
+            Value *l = val_list();
+            for (int i = 0; i < n->list_lit.count; i++) {
+                Value *v = eval(in, e, n->list_lit.items[i]);
+                list_push(l, v);
+            }
+            return l;
+        }
+
+        case ND_MAP_LIT: {
+            Value *m = val_map();
+            for (int i = 0; i < n->map_lit.count; i += 2) {
+                Value *k = eval(in, e, n->map_lit.items[i]);
+                Value *v = eval(in, e, n->map_lit.items[i+1]);
+                if (k->type != VAL_STR) fatal("line %d: map literal key must be a string", n->line);
+                map_set(m, k->str, v);
+                val_deref(k);
+            }
+            return m;
         }
 
         case ND_CALL_EXPR: {
@@ -520,6 +555,12 @@ static Signal exec(Interp *in, Env *e, Node *n) {
             val_deref(v);
             return SIG_NONE;
         }
+        case ND_MAKE_MAP: {
+            Value *v = val_map();
+            env_set(e, n->map_name, v);
+            val_deref(v);
+            return SIG_NONE;
+        }
 
         case ND_ADD_LIST: {
             Value *lv = env_get(e, n->add_list.name);
@@ -533,6 +574,70 @@ static Signal exec(Interp *in, Env *e, Node *n) {
                             sizeof(Value *) * (size_t)sl->cap);
             }
             sl->items[sl->count++] = item;
+            return SIG_NONE;
+        }
+
+        case ND_SET_ITEM: {
+            Value *col = env_get(e, n->set_item.name);
+            if (!col) fatal("line %d: undefined collection '%s'", n->line, n->set_item.name);
+            Value *idx = eval(in, e, n->set_item.index);
+            Value *val = eval(in, e, n->set_item.val);
+            if (col->type == VAL_LIST) {
+                int i = (int)num_of(idx, n->line) - 1;
+                if (i < 0 || i >= col->list->count)
+                    fatal("line %d: list index %d out of bounds", n->line, i+1);
+                val_deref(col->list->items[i]);
+                col->list->items[i] = val;
+            } else if (col->type == VAL_MAP) {
+                if (idx->type != VAL_STR) fatal("line %d: map key must be a string", n->line);
+                int found = 0;
+                for (int i = 0; i < col->map->count; i++) {
+                    if (strcmp(col->map->keys[i], idx->str) == 0) {
+                        val_deref(col->map->values[i]);
+                        col->map->values[i] = val;
+                        found = 1; break;
+                    }
+                }
+                if (!found) {
+                    if (col->map->count >= col->map->cap) {
+                        col->map->cap = col->map->cap ? col->map->cap * 2 : 4;
+                        col->map->keys = (char **)xrealloc(col->map->keys, sizeof(char *) * (size_t)col->map->cap);
+                        col->map->values = (Value **)xrealloc(col->map->values, sizeof(Value *) * (size_t)col->map->cap);
+                    }
+                    col->map->keys[col->map->count] = xstrdup(idx->str);
+                    col->map->values[col->map->count] = val;
+                    col->map->count++;
+                }
+            } else {
+                fatal("line %d: '%s' is not a list or dictionary", n->line, n->set_item.name);
+            }
+            val_deref(idx);
+            return SIG_NONE;
+        }
+
+        case ND_FOR_EACH: {
+            Value *col = eval(in, e, n->for_each.collection);
+            if (!col) fatal("line %d: collection is nothing", n->line);
+            if (col->type == VAL_LIST) {
+                for (int i = 0; i < col->list->count; i++) {
+                    env_set(e, n->for_each.var_name, col->list->items[i]);
+                    Signal sig = exec_block(in, e, &n->for_each.body);
+                    if (sig == SIG_STOP) { in->signal = SIG_NONE; break; }
+                    if (sig == SIG_SKIP) { in->signal = SIG_NONE; continue; }
+                    if (sig != SIG_NONE) { val_deref(col); return sig; }
+                }
+            } else if (col->type == VAL_MAP) {
+                for (int i = 0; i < col->map->count; i++) {
+                    env_set(e, n->for_each.var_name, col->map->values[i]);
+                    Signal sig = exec_block(in, e, &n->for_each.body);
+                    if (sig == SIG_STOP) { in->signal = SIG_NONE; break; }
+                    if (sig == SIG_SKIP) { in->signal = SIG_NONE; continue; }
+                    if (sig != SIG_NONE) { val_deref(col); return sig; }
+                }
+            } else {
+                fatal("line %d: expression is not a list or dictionary", n->line);
+            }
+            val_deref(col);
             return SIG_NONE;
         }
 
