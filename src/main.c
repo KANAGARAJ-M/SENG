@@ -8,14 +8,21 @@
 #include "packages.h"
 #include <string.h>
 #include <stdio.h>
+#ifdef _WIN32
+  #include <direct.h>
+  #define mkdir(path, mode) _mkdir(path)
+#else
+  #include <sys/stat.h>
+  #include <sys/types.h>
+#endif
 
 static void print_usage(void) {
     printf(
         "seng v1.0.2 — Simple English Programming Language\n"
         "\n"
         "Usage:\n"
-        "  seng <file.se>              Run a .se source file\n"
-        "  seng compile <file.se>      Compile to <file.sec> bytecode\n"
+        "  seng <file.se>              Run a .se source file (uses _secache if available)\n"
+        "  seng compile <file.se>      Compile to _secache/ folder\n"
         "  seng run <file.sec>         Execute a compiled .sec file\n"
         "  seng disasm <file.sec>      Disassemble a .sec file\n"
         "  seng repl                   Start an interactive shell\n"
@@ -51,20 +58,62 @@ static void run_repl(void) {
     interp_free(in);
 }
 
-/* build output path: replace .se → .sec */
+/* build output path: store in _secache folder, like python's __pycache__ */
 static char *make_sec_path(const char *src_path) {
-    size_t len = strlen(src_path);
-    char  *out;
-    if (len > 3 && strcmp(src_path + len - 3, ".se") == 0) {
-        out = (char *)xmalloc(len + 2);
-        memcpy(out, src_path, len);
-        out[len]   = 'c';
-        out[len+1] = '\0';
-    } else {
-        out = (char *)xmalloc(len + 5);
-        sprintf(out, "%s.sec", src_path);
+    const char *slash = strrchr(src_path, '/');
+    char dir[1024] = {0};
+    const char *fname = src_path;
+
+    if (slash) {
+        size_t dlen = (size_t)(slash - src_path);
+        if (dlen >= sizeof(dir)) dlen = sizeof(dir) - 1;
+        memcpy(dir, src_path, dlen);
+        fname = slash + 1;
     }
+
+    /* determine base name without .se */
+    char base[256] = {0};
+    size_t flen = strlen(fname);
+    if (flen > 3 && strcmp(fname + flen - 3, ".se") == 0) {
+        size_t blen = flen - 3;
+        if (blen >= sizeof(base)) blen = sizeof(base) - 1;
+        memcpy(base, fname, blen);
+    } else {
+        strncpy(base, fname, sizeof(base) - 1);
+    }
+
+    /* create _secache in the same directory as the source */
+    char cache_dir[1024];
+    if (dir[0]) {
+        snprintf(cache_dir, sizeof(cache_dir), "%s/_secache", dir);
+    } else {
+        strncpy(cache_dir, "_secache", sizeof(cache_dir) - 1);
+    }
+
+    mkdir(cache_dir, 0755);
+
+    /* final path: <dir>/_secache/<base>.sec */
+    char *out = (char *)xmalloc(strlen(cache_dir) + strlen(base) + 10);
+    sprintf(out, "%s/%s.sec", cache_dir, base);
     return out;
+}
+
+/* check if a cached .sec is up to date and valid */
+static int is_cache_valid(const char *cache_path, const char *src_path) {
+    struct stat s_cache, s_src;
+    if (stat(cache_path, &s_cache) != 0) return 0;
+    if (stat(src_path, &s_src) != 0) return 0;
+    if (s_cache.st_mtime < s_src.st_mtime) return 0;
+
+    FILE *f = fopen(cache_path, "rb");
+    if (!f) return 0;
+    char magic[5] = {0};
+    if (fread(magic, 1, 4, f) != 4) { fclose(f); return 0; }
+    uint8_t ver = 0;
+    if (fread(&ver, 1, 1, f) != 1) { fclose(f); return 0; }
+    fclose(f);
+    
+    return (strcmp(magic, SEC_MAGIC) == 0 && ver == SEC_VERSION);
 }
 
 /* Run source file through interpreter */
@@ -144,10 +193,18 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    /* seng <file.se>  — direct interpret */
+    /* seng <file.se>  — run source */
     size_t len = strlen(arg1);
     if (len > 4 && strcmp(arg1 + len - 4, ".sec") == 0) {
         vm_run_file(arg1);
+    } else if (len > 3 && strcmp(arg1 + len - 3, ".se") == 0) {
+        char *cache = make_sec_path(arg1);
+        if (is_cache_valid(cache, arg1)) {
+            vm_run_file(cache);
+        } else {
+            run_source(arg1);
+        }
+        free(cache);
     } else {
         run_source(arg1);
     }

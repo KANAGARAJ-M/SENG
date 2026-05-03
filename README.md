@@ -50,14 +50,14 @@
 # Start an interactive REPL
 seng repl
 
-# Run a source file directly
+# Run a source file directly (automatically uses _secache if up-to-date)
 seng hello.se
 
-# Compile to bytecode
-seng compile hello.se      # → creates hello.sec
+# Compile to bytecode (stored in _secache/ folder)
+seng compile hello.se
 
-# Run compiled bytecode
-seng run hello.sec
+# Run compiled bytecode explicitly
+seng run examples/_secache/hello.sec
 
 # Disassemble bytecode
 seng disasm hello.sec

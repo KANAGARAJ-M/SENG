@@ -41,7 +41,7 @@ Format: `[Version] — YYYY-MM-DD`
 ### 🐛 Bug Fixes & Stability
 - **Circular References** — Implemented cycle-aware stringification and circularity detection for lists and instances.
 - **Parser Ambiguity** — Resolved `item ... of` ambiguity with property access.
-- **VM/Bytecode** — Added `OP_IMPORT` and file inlining during compilation.
+- **VM/Bytecode** — Added `OP_IMPORT`, file inlining during compilation, and a Python-like `_secache` folder for bytecode caching.
 - **Memory Safety** — Fixed uninitialized recursion stacks in value stringification.
 - **OOP Ref-Counting** — Proper reference counting for instances and their members.
 
