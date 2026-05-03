@@ -1,0 +1,101 @@
+note  test_json.se – demonstrates the json package
+
+import json
+import string
+
+note ════════════════════════════════════════
+note  1. json_get – extract top-level key
+note ════════════════════════════════════════
+set data to "{\"name\":\"Alice\",\"age\":30,\"active\":true}"
+
+set name to result of json_get with data and "name"
+say "name     = " + name
+
+set age to result of json_get with data and "age"
+say "age      = " + age
+
+set active to result of json_get with data and "active"
+say "active   = " + active
+
+set miss to result of json_get with data and "missing"
+say "missing  = " + miss
+
+note ════════════════════════════════════════
+note  2. json_has – check key existence
+note ════════════════════════════════════════
+say "has name   = " + result of json_has with data and "name"
+say "has x      = " + result of json_has with data and "x"
+
+note ════════════════════════════════════════
+note  3. json_keys – list all top-level keys
+note ════════════════════════════════════════
+set keys to result of json_keys with data
+say "keys[1]  = " + item 1 of keys
+say "keys[2]  = " + item 2 of keys
+say "keys[3]  = " + item 3 of keys
+
+note ════════════════════════════════════════
+note  4. json_get_path – nested access
+note ════════════════════════════════════════
+set nested to "{\"user\":{\"profile\":{\"city\":\"Berlin\"}}}"
+set city to result of json_get_path with nested and "user.profile.city"
+say "city     = " + city
+
+note ════════════════════════════════════════
+note  5. json_array_len + json_array_get
+note ════════════════════════════════════════
+set arr to "[10,20,30,40]"
+set alen to result of json_array_len with arr
+say "arr len  = " + alen
+
+set a1 to result of json_array_get with arr and 1
+set a3 to result of json_array_get with arr and 3
+say "arr[1]   = " + a1
+say "arr[3]   = " + a3
+
+note ════════════════════════════════════════
+note  6. json_stringify – SENG value → JSON
+note ════════════════════════════════════════
+make list nums
+add 1 to nums
+add 2 to nums
+add 3 to nums
+set js to result of json_stringify with nums
+say "stringify list = " + js
+
+set snum to result of json_stringify with 42
+say "stringify num  = " + snum
+
+set sbool to result of json_stringify with true
+say "stringify bool = " + sbool
+
+set sstr to result of json_stringify with "hello"
+say "stringify str  = " + sstr
+
+note ════════════════════════════════════════
+note  7. json_make_obj – build JSON object
+note ════════════════════════════════════════
+make list k
+add "city" to k
+add "pop" to k
+
+make list v
+add "Tokyo" to v
+add 14000000 to v
+
+set obj to result of json_make_obj with k and v
+say "make_obj = " + obj
+
+note ════════════════════════════════════════
+note  8. json_pretty – format JSON string
+note ════════════════════════════════════════
+set compact to "{\"a\":1,\"b\":[2,3],\"c\":{\"d\":4}}"
+set pretty to result of json_pretty with compact
+say "pretty:"
+say pretty
+
+note ════════════════════════════════════════
+note  9. json_parse – returns SENG list
+note ════════════════════════════════════════
+set parsed to result of json_parse with "[\"x\",\"y\",\"z\"]"
+say "parsed[2] = " + item 2 of parsed

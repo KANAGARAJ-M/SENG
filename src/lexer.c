@@ -77,15 +77,30 @@ static Token scan(Lexer *l) {
         t.type = TK_NEWLINE; t.value = NULL; t.line = line; return t;
     }
 
-    /* ── string literal ─ */
+    /* ── string literal (supports \" \\ \n \t \r escapes) ─ */
     if (c == '"') {
         l->pos++;
-        size_t start = l->pos;
-        while (l->src[l->pos] && l->src[l->pos] != '"' && l->src[l->pos] != '\n')
-            l->pos++;
-        char *val = xstrndup(l->src + start, l->pos - start);
+        size_t cap = 64, len = 0;
+        char *buf = (char *)xmalloc(cap);
+        while (l->src[l->pos] && l->src[l->pos] != '"' && l->src[l->pos] != '\n') {
+            char ch = l->src[l->pos++];
+            if (ch == '\\' && l->src[l->pos]) {
+                char e = l->src[l->pos++];
+                switch (e) {
+                    case '"':  ch = '"';  break;
+                    case '\\': ch = '\\'; break;
+                    case 'n':  ch = '\n'; break;
+                    case 't':  ch = '\t'; break;
+                    case 'r':  ch = '\r'; break;
+                    default:   ch = e;   break;
+                }
+            }
+            if (len + 2 > cap) { cap *= 2; buf = (char *)xrealloc(buf, cap); }
+            buf[len++] = ch;
+        }
+        buf[len] = '\0';
         if (l->src[l->pos] == '"') l->pos++;
-        t.type = TK_STRING; t.value = val; t.line = line; return t;
+        t.type = TK_STRING; t.value = buf; t.line = line; return t;
     }
 
     /* ── number ─── */

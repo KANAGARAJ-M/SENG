@@ -1,0 +1,87 @@
+note  test_http_sys.se – demonstrates http, sys, and extended io packages
+
+note ════════════════════════════════════════
+note  sys package
+note  sleep_ms(ms), time_ms(), timestamp(),
+note  env_get(name), run_cmd(cmd)
+note ════════════════════════════════════════
+import sys
+import string
+
+set t1 to result of time_ms
+say "time_ms        = " + t1
+
+set ts to result of timestamp
+say "timestamp      = " + ts
+
+set path to result of env_get with "PATH"
+set plen to result of str_len with path
+say "env PATH len   = " + plen
+
+set out to result of run_cmd with "echo hello"
+say "run_cmd        = " + out
+
+call sleep_ms with 50
+say "sleep_ms 50 ok"
+
+note ════════════════════════════════════════
+note  io extended functions
+note  append_file, delete_file, rename_file,
+note  file_size, dir_exists, make_dir,
+note  list_dir, get_cwd
+note ════════════════════════════════════════
+import io
+
+set cwd to result of get_cwd
+say "cwd            = " + cwd
+
+set de to result of dir_exists with "examples"
+say "dir_exists     = " + de
+
+set ok1 to result of write_file with "examples/iotest.txt" and "line one"
+say "write_file     = " + ok1
+
+set ok2 to result of append_file with "examples/iotest.txt" and " | line two"
+say "append_file    = " + ok2
+
+set contents to result of read_file with "examples/iotest.txt"
+say "file contents  = " + contents
+
+set sz to result of file_size with "examples/iotest.txt"
+say "file_size      = " + sz
+
+set rok to result of rename_file with "examples/iotest.txt" and "examples/iotest2.txt"
+say "rename         = " + rok
+
+set ex1 to result of file_exists with "examples/iotest2.txt"
+say "exists renamed = " + ex1
+
+set dok to result of delete_file with "examples/iotest2.txt"
+say "delete         = " + dok
+
+set ex2 to result of file_exists with "examples/iotest2.txt"
+say "exists deleted = " + ex2
+
+set mok to result of make_dir with "examples/testdir"
+say "make_dir       = " + mok
+
+set files to result of list_dir with "examples"
+say "list_dir done"
+
+note ════════════════════════════════════════
+note  http package  (requires internet)
+note  http_get, http_post, http_post_json,
+note  http_put, http_delete
+note ════════════════════════════════════════
+import http
+import type
+
+say "--- HTTP GET ---"
+set body to result of http_get with "http://httpbin.org/get"
+set blen to result of str_len with body
+say "http_get len   = " + blen
+
+say "--- HTTP POST ---"
+set resp to result of http_post with "http://httpbin.org/post" and "field=value"
+set rlen to result of str_len with resp
+say "http_post len  = " + rlen

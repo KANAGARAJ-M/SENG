@@ -1,7 +1,7 @@
 
 CC     = gcc
 CFLAGS = -Wall -Wextra -std=c99 -O2 -Isrc
-LDFLAGS= -lm
+LDFLAGS= -lm -lwininet
 
 SRC = src/common.c   \
       src/lexer.c    \
@@ -44,6 +44,12 @@ test: $(TARGET)
 	@echo ""
 	@echo "=== test_import.se (file import + built-in packages) ==="
 	./$(TARGET) examples/test_import.se
+	@echo ""
+	@echo "=== test_http_sys.se (http, sys, extended io) ==="
+	./$(TARGET) examples/test_http_sys.se
+	@echo ""
+	@echo "=== test_json.se (json package) ==="
+	./$(TARGET) examples/test_json.se
 
 clean:
 	del /Q src\*.o $(TARGET).exe 2>nul || rm -f src/*.o $(TARGET)

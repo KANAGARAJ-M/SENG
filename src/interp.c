@@ -431,7 +431,7 @@ static Signal exec(Interp *in, Env *e, Node *n) {
 
         case ND_IMPORT_PKG: {
             if (!pkg_register(in->globals, n->str))
-                fatal("line %d: unknown package '%s'  (available: math, string, io, type)",
+                fatal("line %d: unknown package '%s'  (available: math, string, io, type, http, sys, json)",
                       n->line, n->str);
             return SIG_NONE;
         }
