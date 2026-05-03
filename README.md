@@ -37,6 +37,7 @@
 - **🧩 Ideology**: Programming is a human right. We focus on computational thinking without abstract symbol barriers.
 - **🎯 Mission**: Zero-friction entry point into software development for educators and self-learners.
 - **🔭 Vision**: Natural language as the global standard for introductory programming and AI automation.
+- **💻 Supported Platforms**: Windows 🪟 & Linux 🐧
 </details>
 
 ---
@@ -125,6 +126,31 @@ call greet with "Alice"
 make list fruits
 add "Apple" to fruits
 say item 1 of fruits
+```
+</details>
+
+<details>
+<summary><b>🏛️ Object-Oriented Programming (Blueprints)</b></summary>
+
+```seng
+# Define a blueprint
+create blueprint Person
+    has name
+    has age
+
+    define init with n and a
+        set name of me to n
+        set age of me to a
+    end
+
+    define greet
+        say "Hello, I am " + name of me
+    end
+end
+
+# Create an instance
+create instance of Person called p1 with "Alice" and 30
+call greet of p1
 ```
 </details>
 
