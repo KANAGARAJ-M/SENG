@@ -1,0 +1,116 @@
+note  test_import.se  – demonstrates file imports and built-in packages
+
+note ════════════════════════════════════════
+note  1. FILE IMPORT
+note  Define functions in mylib.se, then use them here.
+note ════════════════════════════════════════
+import "examples/mylib.se"
+
+call greet with "World"
+
+set total to result of add_two with 10 and 25
+say "10 + 25 = " + total
+
+set fact to result of factorial with 7
+say "7! = " + fact
+
+note ════════════════════════════════════════
+note  2. math package
+note  import math  →  sqrt, floor, ceil, round, abs, power,
+note                   log, log10, sin, cos, tan, min, max,
+note                   random, random_int, and constant pi
+note ════════════════════════════════════════
+import math
+
+say "sqrt(144)   = " + result of sqrt with 144
+say "floor(3.9)  = " + result of floor with 3.9
+say "ceil(3.1)   = " + result of ceil with 3.1
+say "abs(-42)    = " + result of abs with -42
+say "power(2,10) = " + result of power with 2 and 10
+say "sin(0)      = " + result of sin with 0
+say "pi          = " + pi
+say "min(5,9)    = " + result of min with 5 and 9
+say "max(5,9)    = " + result of max with 5 and 9
+say "round(2.6)  = " + result of round with 2.6
+
+note ════════════════════════════════════════
+note  3. string package
+note  import string  →  str_len, upper, lower, trim,
+note                     contains, starts_with, ends_with,
+note                     replace, split, join, str_num,
+note                     num_str, str_repeat, char_at, sub_str
+note ════════════════════════════════════════
+import string
+
+say "str_len 'hello' = " + result of str_len with "hello"
+say "upper 'hello'   = " + result of upper with "hello"
+say "lower 'WORLD'   = " + result of lower with "WORLD"
+
+set msg to "  Hello, SENG!  "
+set trimmed to result of trim with msg
+say "trim result = '" + trimmed + "'"
+
+say "contains 'foobar','oba' = " + result of contains with "foobar" and "oba"
+say "starts_with 'hello','he' = " + result of starts_with with "hello" and "he"
+say "ends_with 'hello','lo'   = " + result of ends_with with "hello" and "lo"
+
+set replaced to result of replace with "aabbcc" and "b" and "X"
+say "replace 'aabbcc','b','X' = " + replaced
+
+say "char_at 'hello' 2 = " + result of char_at with "hello" and 2
+
+set piece to result of sub_str with "hello world" and 7 and 11
+say "sub_str 'hello world' 7 11 = " + piece
+
+set rep to result of str_repeat with "ab" and 3
+say "str_repeat 'ab' 3 = " + rep
+
+say "str_num '3.14' = " + result of str_num with "3.14"
+say "num_str 42     = " + result of num_str with 42
+
+set parts to result of split with "one,two,three" and ","
+say "split[1] = " + item 1 of parts
+say "split[2] = " + item 2 of parts
+say "split[3] = " + item 3 of parts
+
+make list words
+add "apple" to words
+add "banana" to words
+add "cherry" to words
+set joined to result of join with words and " | "
+say "join = " + joined
+
+note ════════════════════════════════════════
+note  4. type package
+note  import type  →  to_num, to_str, is_num, is_str,
+note                   is_bool, is_list_val, is_nothing, type_of
+note ════════════════════════════════════════
+import type
+
+say "type_of 42     = " + result of type_of with 42
+say "type_of 'hi'   = " + result of type_of with "hi"
+say "type_of true   = " + result of type_of with true
+say "type_of list   = " + result of type_of with words
+say "is_num 5       = " + result of is_num with 5
+say "is_str 'hello' = " + result of is_str with "hello"
+say "is_nothing     = " + result of is_nothing with nothing
+set converted to result of to_str with 100
+say "to_str 100     = " + converted
+set parsed to result of to_num with "7"
+say "to_num '7'     = " + parsed
+
+note ════════════════════════════════════════
+note  5. io package
+note  import io  →  read_file, write_file,
+note                 file_exists, print_inline
+note ════════════════════════════════════════
+import io
+
+set ok to result of write_file with "examples/out.txt" and "Written by the SENG io package!"
+say "write_file ok   = " + ok
+
+set data to result of read_file with "examples/out.txt"
+say "read_file       = " + data
+
+say "file_exists ok  = " + result of file_exists with "examples/out.txt"
+say "file_exists bad = " + result of file_exists with "examples/no_file.txt"

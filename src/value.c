@@ -10,10 +10,11 @@ static Value *val_alloc(ValType t) {
     return v;
 }
 
-Value *val_num (double d)        { Value *v = val_alloc(VAL_NUM);  v->num      = d; return v; }
-Value *val_bool(int   b)         { Value *v = val_alloc(VAL_BOOL); v->bool_val = !!b; return v; }
-Value *val_null(void)            { return val_alloc(VAL_NULL); }
-Value *val_func(SengFunc *f)     { Value *v = val_alloc(VAL_FUNC); v->func = f; return v; }
+Value *val_num   (double d)       { Value *v = val_alloc(VAL_NUM);    v->num      = d; return v; }
+Value *val_bool  (int    b)       { Value *v = val_alloc(VAL_BOOL);   v->bool_val = !!b; return v; }
+Value *val_null  (void)           { return val_alloc(VAL_NULL); }
+Value *val_func  (SengFunc *f)    { Value *v = val_alloc(VAL_FUNC);   v->func   = f; return v; }
+Value *val_native(SengNative *n)  { Value *v = val_alloc(VAL_NATIVE); v->native = n; return v; }
 
 Value *val_str(const char *s) {
     Value *v = val_alloc(VAL_STR);
@@ -44,12 +45,13 @@ void val_deref(Value *v) {
 int val_truthy(const Value *v) {
     if (!v) return 0;
     switch (v->type) {
-        case VAL_BOOL: return v->bool_val;
-        case VAL_NUM:  return v->num != 0.0;
-        case VAL_STR:  return v->str && v->str[0] != '\0';
-        case VAL_NULL: return 0;
-        case VAL_LIST: return v->list->count > 0;
-        default:       return 1;
+        case VAL_BOOL:   return v->bool_val;
+        case VAL_NUM:    return v->num != 0.0;
+        case VAL_STR:    return v->str && v->str[0] != '\0';
+        case VAL_NULL:   return 0;
+        case VAL_LIST:   return v->list->count > 0;
+        case VAL_NATIVE: return 1;
+        default:         return 1;
     }
 }
 
@@ -62,6 +64,10 @@ char *val_to_string(const Value *v) {
         case VAL_STR:  return xstrdup(v->str);
         case VAL_FUNC: {
             snprintf(buf, sizeof buf, "<function %s>", v->func ? v->func->name : "?");
+            return xstrdup(buf);
+        }
+        case VAL_NATIVE: {
+            snprintf(buf, sizeof buf, "<builtin %s>", v->native ? v->native->name : "?");
             return xstrdup(buf);
         }
         case VAL_NUM: {
@@ -105,7 +111,8 @@ Value *val_copy(const Value *src) {
         case VAL_BOOL: return val_bool(src->bool_val);
         case VAL_NULL: return val_null();
         case VAL_STR:  return val_str(src->str);
-        case VAL_FUNC: { Value *v = val_alloc(VAL_FUNC); v->func = src->func; return v; }
+        case VAL_FUNC:   { Value *v = val_alloc(VAL_FUNC);   v->func   = src->func;   return v; }
+        case VAL_NATIVE: { Value *v = val_alloc(VAL_NATIVE); v->native = src->native; return v; }
         case VAL_LIST: {
             Value *v = val_list();
             for (int i = 0; i < src->list->count; i++) {

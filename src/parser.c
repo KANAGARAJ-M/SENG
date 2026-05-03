@@ -482,11 +482,21 @@ static Node *parse_stmt(Parser *p) {
     /* ── import ── */
     if (tk.type == TK_IMPORT) {
         p_advance(p);
-        Token path = p_expect(p, TK_STRING);
-        eat_newline(p);
-        Node *n = node_new(ND_IMPORT, ln);
-        n->import_path = path.value;
-        return n;
+        if (p_check(p, TK_STRING)) {
+            /* import "file.se" */
+            Token path = p_expect(p, TK_STRING);
+            eat_newline(p);
+            Node *n = node_new(ND_IMPORT, ln);
+            n->import_path = path.value;
+            return n;
+        } else {
+            /* import math  (built-in package) */
+            Token nm = p_expect(p, TK_IDENT);
+            eat_newline(p);
+            Node *n = node_new(ND_IMPORT_PKG, ln);
+            n->str = nm.value;
+            return n;
+        }
     }
 
     /* ── stop / skip ── */

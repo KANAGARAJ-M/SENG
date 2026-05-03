@@ -2,6 +2,7 @@
 #include "interp.h"
 #include "lexer.h"
 #include "parser.h"
+#include "packages.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -13,6 +14,9 @@ struct Interp {
     Env   *globals;
     Signal signal;
     Value *ret_val;
+    Node **imported;     /* imported ASTs kept alive so body_ref stays valid */
+    int    import_count;
+    int    import_cap;
 };
 
 /* forward decls */
@@ -179,12 +183,28 @@ static Value *eval(Interp *in, Env *e, Node *n) {
         }
 
         case ND_CALL_EXPR: {
-            /* look up function */
             Value *fv = env_get(e, n->call.name);
-            if (!fv || fv->type != VAL_FUNC)
+            if (!fv || (fv->type != VAL_FUNC && fv->type != VAL_NATIVE))
                 fatal("line %d: '%s' is not a function", n->line, n->call.name);
-            SengFunc *fn = fv->func;
 
+            /* native (built-in) function */
+            if (fv->type == VAL_NATIVE) {
+                SengNative *nat = fv->native;
+                int argc = n->call.args.count;
+                if (nat->arity >= 0 && argc != nat->arity)
+                    fatal("line %d: '%s' expects %d argument(s), got %d",
+                          n->line, nat->name, nat->arity, argc);
+                Value **args = (Value **)xmalloc(sizeof(Value *) * (size_t)(argc > 0 ? argc : 1));
+                for (int i = 0; i < argc; i++)
+                    args[i] = eval(in, e, n->call.args.items[i]);
+                Value *rv = nat->fn(args, argc);
+                for (int i = 0; i < argc; i++) val_deref(args[i]);
+                free(args);
+                return rv;
+            }
+
+            /* user-defined function */
+            SengFunc *fn = fv->func;
             if (n->call.args.count != fn->param_count)
                 fatal("line %d: '%s' expects %d argument(s), got %d",
                       n->line, fn->name, fn->param_count, n->call.args.count);
@@ -316,10 +336,28 @@ static Signal exec(Interp *in, Env *e, Node *n) {
 
         case ND_CALL_STMT: {
             Value *fv = env_get(e, n->call.name);
-            if (!fv || fv->type != VAL_FUNC)
+            if (!fv || (fv->type != VAL_FUNC && fv->type != VAL_NATIVE))
                 fatal("line %d: '%s' is not a function", n->line, n->call.name);
-            SengFunc *fn = fv->func;
 
+            /* native (built-in) function */
+            if (fv->type == VAL_NATIVE) {
+                SengNative *nat = fv->native;
+                int argc = n->call.args.count;
+                if (nat->arity >= 0 && argc != nat->arity)
+                    fatal("line %d: '%s' expects %d argument(s), got %d",
+                          n->line, nat->name, nat->arity, argc);
+                Value **args = (Value **)xmalloc(sizeof(Value *) * (size_t)(argc > 0 ? argc : 1));
+                for (int i = 0; i < argc; i++)
+                    args[i] = eval(in, e, n->call.args.items[i]);
+                Value *rv = nat->fn(args, argc);
+                for (int i = 0; i < argc; i++) val_deref(args[i]);
+                free(args);
+                val_deref(rv);
+                return SIG_NONE;
+            }
+
+            /* user-defined function */
+            SengFunc *fn = fv->func;
             if (n->call.args.count != fn->param_count)
                 fatal("line %d: '%s' expects %d argument(s), got %d",
                       n->line, fn->name, fn->param_count, n->call.args.count);
@@ -381,7 +419,20 @@ static Signal exec(Interp *in, Env *e, Node *n) {
             lexer_free(lex);
             free(src);
             exec_block(in, in->globals, &prog->program);
-            node_free(prog);
+            /* keep prog alive: function body_refs point into this AST */
+            if (in->import_count >= in->import_cap) {
+                in->import_cap   = in->import_cap ? in->import_cap * 2 : 4;
+                in->imported     = (Node **)xrealloc(in->imported,
+                                   sizeof(Node *) * (size_t)in->import_cap);
+            }
+            in->imported[in->import_count++] = prog;
+            return SIG_NONE;
+        }
+
+        case ND_IMPORT_PKG: {
+            if (!pkg_register(in->globals, n->str))
+                fatal("line %d: unknown package '%s'  (available: math, string, io, type)",
+                      n->line, n->str);
             return SIG_NONE;
         }
 
@@ -408,6 +459,8 @@ Interp *interp_new(void) {
 void interp_free(Interp *in) {
     env_free(in->globals);
     if (in->ret_val) val_deref(in->ret_val);
+    for (int i = 0; i < in->import_count; i++) node_free(in->imported[i]);
+    free(in->imported);
     free(in);
 }
 

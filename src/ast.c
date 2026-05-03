@@ -30,7 +30,8 @@ void node_free(Node *n) {
         case ND_RETURN: node_free(n->ret); break;
         case ND_MAKE_LIST: free(n->list_name); break;
         case ND_ADD_LIST: node_free(n->add_list.val); free(n->add_list.name); break;
-        case ND_IMPORT: free(n->import_path); break;
+        case ND_IMPORT:     free(n->import_path); break;
+        case ND_IMPORT_PKG: free(n->str); break;
         case ND_BINOP:  node_free(n->binop.left); node_free(n->binop.right); break;
         case ND_NEGATE: case ND_NOT: node_free(n->unary); break;
         case ND_CMP:    node_free(n->cmp.left); node_free(n->cmp.right); break;

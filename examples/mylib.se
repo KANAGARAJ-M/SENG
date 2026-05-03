@@ -1,0 +1,16 @@
+note  mylib.se  – shared library file
+
+define greet with name
+    say "Hello, " + name + "!"
+end
+
+define add_two with x and y
+    give back x + y
+end
+
+define factorial with n
+    if n is less than 2 then
+        give back 1
+    end
+    give back n * result of factorial with n - 1
+end

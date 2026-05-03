@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make clean *)",
+      "Bash(make)",
+      "PowerShell(cd C:\\\\Users\\\\kanag\\\\Desktop\\\\seng; $srcs = @\\(\"src/common.c\",\"src/lexer.c\",\"src/ast.c\",\"src/parser.c\",\"src/value.c\",\"src/env.c\",\"src/packages.c\",\"src/interp.c\",\"src/compiler.c\",\"src/vm.c\",\"src/main.c\"\\); gcc -Wall -Wextra -std=c99 -O2 -Isrc -o seng.exe \\($srcs -join \" \"\\) -lm 2>&1)",
+      "Skill(update-config)",
+      "Bash(echo '{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"C:\\\\\\\\Users\\\\\\\\kanag\\\\\\\\Desktop\\\\\\\\seng\\\\\\\\Makefile\"}}')",
+      "Bash(bash -c 'git add -A && git diff --cached --quiet || \\(git commit -m \"auto-update\" && git push origin main\\)')"
+    ]
+  }
+}

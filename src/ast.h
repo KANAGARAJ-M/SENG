@@ -20,6 +20,7 @@ typedef enum {
     ND_MAKE_LIST, /* make list x                */
     ND_ADD_LIST,  /* add <val> to x             */
     ND_IMPORT,    /* import "file.se"           */
+    ND_IMPORT_PKG,/* import math                */
     ND_STOP,      /* stop  (break)              */
     ND_SKIP,      /* skip  (continue)           */
     /* expressions */
