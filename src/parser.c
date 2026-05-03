@@ -122,11 +122,39 @@ static Node *parse_primary(Parser *p) {
     if (tk.type == TK_ITEM) {
         p_advance(p);
         Node *idx = parse_expr(p);
-        p_expect(p, TK_OF);
-        Token nm  = p_expect(p, TK_IDENT);
-        Node *n   = node_new(ND_LIST_GET, ln);
+        char *list_name = NULL;
+        if (p_match(p, TK_OF)) {
+            Token nm = p_expect(p, TK_IDENT);
+            list_name = nm.value;
+        } else if (idx->kind == ND_PROP_GET) {
+            /* Ambiguity: 'item name of me of list' was parsed as idx=(name of (me of list)).
+               We need to extract the rightmost identifier as the list name. */
+            Node *parent = NULL;
+            Node *curr = idx;
+            while (curr->prop_get.obj->kind == ND_PROP_GET) {
+                parent = curr;
+                curr = curr->prop_get.obj;
+            }
+            if (curr->prop_get.obj->kind == ND_IDENT) {
+                list_name = curr->prop_get.obj->str;
+                if (parent) {
+                    Node *bottom_idx = node_new(ND_IDENT, curr->line);
+                    bottom_idx->str = curr->prop_get.name;
+                    parent->prop_get.obj = bottom_idx;
+                } else {
+                    Node *real_idx = node_new(ND_IDENT, idx->line);
+                    real_idx->str = idx->prop_get.name;
+                    idx = real_idx;
+                }
+            } else {
+                fatal("line %d: expected 'of' after item index", ln);
+            }
+        } else {
+            fatal("line %d: expected 'of' after item index", ln);
+        }
+        Node *n = node_new(ND_LIST_GET, ln);
         n->list_get.index = idx;
-        n->list_get.name  = nm.value;
+        n->list_get.name  = list_name;
         return n;
     }
 
@@ -518,19 +546,33 @@ static Node *parse_stmt(Parser *p) {
         p_advance(p);
         if (p_match(p, TK_BLUEPRINT)) {
             Token nm = p_expect(p, TK_IDENT);
+            char *parent = NULL;
+            if (p_match(p, TK_FROM)) {
+                Token ptk = p_expect(p, TK_IDENT);
+                parent = ptk.value;
+            }
             eat_newline(p);
             Node *n = node_new(ND_CLASS, ln);
             n->klass.name = nm.value;
+            n->klass.parent_name = parent;
             skip_newlines(p);
             while (!p_check(p, TK_END) && !p_check(p, TK_EOF)) {
+                int hidden = p_match(p, TK_HIDDEN);
                 if (p_match(p, TK_HAS)) {
                     Token f = p_expect(p, TK_IDENT);
                     n->klass.fields = (char **)xrealloc(n->klass.fields,
                         sizeof(char *) * (size_t)(n->klass.field_count + 1));
-                    n->klass.fields[n->klass.field_count++] = f.value;
+                    n->klass.field_hidden = (int *)xrealloc(n->klass.field_hidden,
+                        sizeof(int) * (size_t)(n->klass.field_count + 1));
+                    n->klass.fields[n->klass.field_count] = f.value;
+                    n->klass.field_hidden[n->klass.field_count] = hidden;
+                    n->klass.field_count++;
                     eat_newline(p);
                 } else if (p_check(p, TK_DEFINE)) {
                     node_list_push(&n->klass.methods, parse_stmt(p));
+                    n->klass.method_hidden = (int *)xrealloc(n->klass.method_hidden,
+                        sizeof(int) * (size_t)n->klass.methods.count);
+                    n->klass.method_hidden[n->klass.methods.count - 1] = hidden;
                 } else if (p_check(p, TK_NEWLINE)) {
                     p_advance(p);
                 } else {
@@ -582,6 +624,37 @@ static Node *parse_stmt(Parser *p) {
     /* ── stop / skip ── */
     if (tk.type == TK_STOP)  { p_advance(p); eat_newline(p); return node_new(ND_STOP, ln); }
     if (tk.type == TK_SKIP)  { p_advance(p); eat_newline(p); return node_new(ND_SKIP, ln); }
+
+    /* ── try / catch ── */
+    if (tk.type == TK_TRY) {
+        p_advance(p);
+        eat_newline(p);
+        Node *n = node_new(ND_TRY, ln);
+        while (!p_check(p, TK_CATCH) && !p_check(p, TK_EOF)) {
+            node_list_push(&n->try_catch.try_body, parse_stmt(p));
+        }
+        p_expect(p, TK_CATCH);
+        if (p_check(p, TK_IDENT)) {
+            Token v = p_expect(p, TK_IDENT);
+            n->try_catch.catch_var = v.value;
+        }
+        eat_newline(p);
+        while (!p_check(p, TK_END) && !p_check(p, TK_EOF)) {
+            node_list_push(&n->try_catch.catch_body, parse_stmt(p));
+        }
+        p_expect(p, TK_END);
+        eat_newline(p);
+        return n;
+    }
+
+    /* ── throw ── */
+    if (tk.type == TK_THROW) {
+        p_advance(p);
+        Node *n = node_new(ND_THROW, ln);
+        n->throw_err.expr = parse_expr(p);
+        eat_newline(p);
+        return n;
+    }
 
     /* ── blank line ── */
     if (tk.type == TK_NEWLINE) { p_advance(p); return NULL; }

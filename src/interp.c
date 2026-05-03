@@ -8,12 +8,13 @@
 #include <math.h>
 
 /* ── control-flow signals ────────────────────────────────────── */
-typedef enum { SIG_NONE, SIG_RETURN, SIG_STOP, SIG_SKIP } Signal;
+typedef enum { SIG_NONE, SIG_RETURN, SIG_STOP, SIG_SKIP, SIG_ERROR } Signal;
 
 struct Interp {
     Env   *globals;
     Signal signal;
     Value *ret_val;
+    Value *err_val;      /* value thrown */
     Node **imported;     /* imported ASTs kept alive so body_ref stays valid */
     int    import_count;
     int    import_cap;
@@ -40,18 +41,6 @@ static char *concat_vals(Value *a, Value *b, int line) {
     strcpy(r, sa); strcat(r, sb);
     free(sa); free(sb);
     return r;
-}
-
-static int find_field(SengClass *c, const char *name) {
-    for (int i = 0; i < c->field_count; i++)
-        if (strcmp(c->fields[i], name) == 0) return i;
-    return -1;
-}
-
-static Value *find_method(SengClass *c, const char *name) {
-    for (int i = 0; i < c->method_count; i++)
-        if (strcmp(c->methods[i].name, name) == 0) return c->methods[i].method;
-    return NULL;
 }
 
 static SengFunc *make_func(Node *n) {
@@ -101,6 +90,8 @@ static Value *call_func(Interp *in, Env *e, Value *fv, NodeList *arg_nodes, Valu
     NodeList *body = (NodeList *)fn->body_ref;
     exec_block(in, fenv, body);
     env_free(fenv);
+
+    if (in->signal == SIG_ERROR) return val_null();
 
     Value *rv = in->ret_val ? in->ret_val : val_null();
     in->ret_val = NULL;
@@ -255,6 +246,14 @@ static Value *eval(Interp *in, Env *e, Node *n) {
             int idx = find_field(obj->instance->klass, n->prop_get.name);
             if (idx < 0) fatal("line %d: instance of '%s' has no field '%s'",
                                n->line, obj->instance->klass->name, n->prop_get.name);
+
+            if (obj->instance->klass->field_hidden[idx]) {
+                Value *me = env_get(e, "me");
+                if (!me || me->type != VAL_INSTANCE || me->instance != obj->instance)
+                    fatal("line %d: cannot access hidden field '%s' outside of its blueprint",
+                          n->line, n->prop_get.name);
+            }
+
             Value *res = val_copy(obj->instance->fields[idx]);
             val_deref(obj);
             return res;
@@ -273,6 +272,14 @@ static Value *eval(Interp *in, Env *e, Node *n) {
                 me_val = eval(in, e, n->call.obj);
                 if (!me_val || me_val->type != VAL_INSTANCE)
                     fatal("line %d: expected an instance for method call", n->line);
+                
+                if (is_method_hidden(me_val->instance->klass, n->call.name)) {
+                    Value *cur_me = env_get(e, "me");
+                    if (!cur_me || cur_me->type != VAL_INSTANCE || cur_me->instance != me_val->instance)
+                        fatal("line %d: cannot call hidden method '%s' outside of its blueprint",
+                              n->line, n->call.name);
+                }
+
                 fv = find_method(me_val->instance->klass, n->call.name);
                 if (!fv) fatal("line %d: blueprint '%s' has no method '%s'",
                                n->line, me_val->instance->klass->name, n->call.name);
@@ -296,6 +303,7 @@ static Signal exec_block(Interp *in, Env *e, NodeList *bl) {
     for (int i = 0; i < bl->count; i++) {
         Signal s = exec(in, e, bl->items[i]);
         if (s != SIG_NONE) return s;
+        if (in->signal != SIG_NONE) return in->signal;
     }
     return SIG_NONE;
 }
@@ -317,6 +325,14 @@ static Signal exec(Interp *in, Env *e, Node *n) {
             int idx = find_field(obj->instance->klass, n->prop_set.name);
             if (idx < 0) fatal("line %d: instance of '%s' has no field '%s'",
                                n->line, obj->instance->klass->name, n->prop_set.name);
+
+            if (obj->instance->klass->field_hidden[idx]) {
+                Value *me = env_get(e, "me");
+                if (!me || me->type != VAL_INSTANCE || me->instance != obj->instance)
+                    fatal("line %d: cannot set hidden field '%s' outside of its blueprint",
+                          n->line, n->prop_set.name);
+            }
+
             Value *v = eval(in, e, n->prop_set.expr);
             val_deref(obj->instance->fields[idx]);
             obj->instance->fields[idx] = val_copy(v);
@@ -403,10 +419,32 @@ static Signal exec(Interp *in, Env *e, Node *n) {
         case ND_CLASS: {
             SengClass *c = (SengClass *)xcalloc(1, sizeof(SengClass));
             c->name = xstrdup(n->klass.name);
-            c->field_count = n->klass.field_count;
-            c->fields = (char **)xmalloc(sizeof(char *) * (size_t)(c->field_count ? c->field_count : 1));
-            for (int i = 0; i < c->field_count; i++)
-                c->fields[i] = xstrdup(n->klass.fields[i]);
+            if (n->klass.parent_name) {
+                Value *pv = env_get(e, n->klass.parent_name);
+                if (!pv || pv->type != VAL_CLASS)
+                    fatal("line %d: parent blueprint '%s' not found", n->line, n->klass.parent_name);
+                c->parent = pv->klass;
+                /* inherit fields */
+                c->field_count = c->parent->field_count + n->klass.field_count;
+                c->fields = (char **)xmalloc(sizeof(char *) * (size_t)(c->field_count ? c->field_count : 1));
+                c->field_hidden = (int *)xmalloc(sizeof(int) * (size_t)(c->field_count ? c->field_count : 1));
+                for (int i = 0; i < c->parent->field_count; i++) {
+                    c->fields[i] = xstrdup(c->parent->fields[i]);
+                    c->field_hidden[i] = c->parent->field_hidden[i];
+                }
+                for (int i = 0; i < n->klass.field_count; i++) {
+                    c->fields[c->parent->field_count + i] = xstrdup(n->klass.fields[i]);
+                    c->field_hidden[c->parent->field_count + i] = n->klass.field_hidden[i];
+                }
+            } else {
+                c->field_count = n->klass.field_count;
+                c->fields = (char **)xmalloc(sizeof(char *) * (size_t)(c->field_count ? c->field_count : 1));
+                c->field_hidden = (int *)xmalloc(sizeof(int) * (size_t)(c->field_count ? c->field_count : 1));
+                for (int i = 0; i < c->field_count; i++) {
+                    c->fields[i] = xstrdup(n->klass.fields[i]);
+                    c->field_hidden[i] = n->klass.field_hidden[i];
+                }
+            }
             
             c->method_count = n->klass.methods.count;
             c->methods = xmalloc(sizeof(*c->methods) * (size_t)(c->method_count ? c->method_count : 1));
@@ -415,6 +453,7 @@ static Signal exec(Interp *in, Env *e, Node *n) {
                 SengFunc *fn = make_func(mn);
                 c->methods[i].name = xstrdup(fn->name);
                 c->methods[i].method = val_func(fn);
+                c->methods[i].hidden = n->klass.method_hidden[i];
             }
             Value *cv = val_class(c);
             env_set(e, c->name, cv);
@@ -527,6 +566,32 @@ static Signal exec(Interp *in, Env *e, Node *n) {
 
         case ND_STOP:  in->signal = SIG_STOP; return SIG_STOP;
         case ND_SKIP:  in->signal = SIG_SKIP; return SIG_SKIP;
+
+        case ND_THROW: {
+            Value *v = eval(in, e, n->throw_err.expr);
+            if (in->signal != SIG_NONE) return in->signal;
+            in->err_val = v;
+            in->signal  = SIG_ERROR;
+            return SIG_ERROR;
+        }
+
+        case ND_TRY: {
+            Signal sig = exec_block(in, e, &n->try_catch.try_body);
+            if (sig == SIG_ERROR) {
+                in->signal = SIG_NONE;
+                Env *cenv = env_new(e);
+                if (n->try_catch.catch_var) {
+                    env_set(cenv, n->try_catch.catch_var, in->err_val);
+                }
+                if (in->err_val) val_deref(in->err_val);
+                in->err_val = NULL;
+                
+                sig = exec_block(in, cenv, &n->try_catch.catch_body);
+                env_free(cenv);
+                return sig;
+            }
+            return sig;
+        }
 
         case ND_PROGRAM:
             return exec_block(in, e, &n->program);

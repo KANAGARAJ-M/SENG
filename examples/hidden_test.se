@@ -1,0 +1,21 @@
+create blueprint Secret
+    hidden has password
+    has username
+    
+    define init with u and p
+        set username of me to u
+        set password of me to p
+    end
+    
+    define show
+        say "User: " + username of me
+        say "Pass: " + password of me
+    end
+end
+
+create instance of Secret called s with "admin" and "1234"
+call show of s
+say "Public Username: " + username of s
+
+# Testing access control
+# say password of s # This should cause a fatal error

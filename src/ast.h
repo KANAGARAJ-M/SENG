@@ -23,6 +23,8 @@ typedef enum {
     ND_IMPORT_PKG,/* import math                */
     ND_STOP,      /* stop  (break)              */
     ND_SKIP,      /* skip  (continue)           */
+    ND_TRY,       /* try ... catch ...          */
+    ND_THROW,     /* throw <expr>               */
     /* expressions */
     ND_NUMBER,    /* 3.14                       */
     ND_STRING,    /* "hello"                    */
@@ -113,9 +115,12 @@ struct Node {
         /* ND_CLASS */
         struct {
             char     *name;
+            char     *parent_name;
             char    **fields;
+            int      *field_hidden;
             int       field_count;
             NodeList  methods;
+            int      *method_hidden;
         } klass;
 
         /* ND_NEW */
@@ -137,6 +142,16 @@ struct Node {
             Node *obj;
             Node *expr;
         } prop_set;
+        /* ND_TRY */
+        struct {
+            NodeList try_body;
+            char    *catch_var;
+            NodeList catch_body;
+        } try_catch;
+        /* ND_THROW */
+        struct {
+            Node *expr;
+        } throw_err;
     };
 };
 

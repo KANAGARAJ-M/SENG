@@ -14,9 +14,9 @@ typedef enum {
     /* ── keywords ── */
     TK_ADD,     TK_AND,    TK_ASK,    TK_BACK,   TK_BLUEPRINT, TK_BY,
     TK_CALL,    TK_CALLED, TK_CREATE, TK_DEFINE, TK_DIVIDED,
-    TK_ELSE,    TK_END,    TK_EQUAL,
+    TK_ELSE,    TK_END,    TK_EQUAL,   TK_FROM,
     TK_FOR,     TK_GIVE,   TK_GREATER, TK_HAS,
-    TK_IF,      TK_IMPORT, TK_INSTANCE, TK_IS,     TK_ITEM,
+    TK_IF,      TK_IMPORT, TK_INSTANCE, TK_IS,     TK_ITEM,   TK_HIDDEN,
     TK_LENGTH,  TK_LESS,   TK_LIST,
     TK_MAKE,    TK_ME,     TK_MINUS,  TK_MOD,
     TK_NOT,     TK_NOTE,
@@ -25,6 +25,7 @@ typedef enum {
     TK_SKIP,    TK_STOP,
     TK_THAN,    TK_THEN,   TK_TIMES,  TK_TO,
     TK_WHILE,   TK_WITH,
+    TK_TRY,     TK_CATCH,  TK_THROW,
 
     /* ── operators ── */
     TK_PLUS_OP,   /* +  */

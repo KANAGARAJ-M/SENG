@@ -93,26 +93,31 @@ x is greater than or equal to 5
 x is less than or equal to 5
 ```
 
-### Object-Oriented Programming
+### Object-Oriented Programming (Full Support)
+SENG supports blueprints, instances, and inheritance. OOP is implemented in both the interpreter and the Bytecode VM.
+
+#### Blueprint & Inheritance
 ```seng
-create blueprint Person
+create blueprint Animal
     has name
-    has age
-
-    define init with n and a             # constructor
+    define init with n
         set name of me to n
-        set age of me to a
-    end
-
-    define greet
-        say "Hello, I am " + name of me
     end
 end
 
-create instance of Person called p1 with "Alice" and 30
-call greet of p1
-set age of p1 to 31
-say age of p1
+create blueprint Dog from Animal
+    define speak
+        say name of me + " barks: Woof!"
+    end
+end
+```
+
+#### Instantiation & Usage
+```seng
+create instance of Dog called myDog with "Buddy"
+call speak of myDog
+set name of myDog to "Max"
+say name of myDog
 ```
 
 ## Key Design Decisions

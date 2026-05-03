@@ -36,11 +36,14 @@ typedef struct {
 
 typedef struct SengClass {
     char   *name;
+    struct SengClass *parent;
     char  **fields;
+    int    *field_hidden;
     int     field_count;
     struct {
         char  *name;
         Value *method;
+        int    hidden;
     } *methods;
     int     method_count;
 } SengClass;
@@ -74,6 +77,10 @@ Value *val_func  (SengFunc *f);
 Value *val_native(SengNative *n);
 Value *val_class (SengClass *c);
 Value *val_instance(SengInstance *i);
+int    find_field(SengClass *c, const char *name);
+Value *find_method(SengClass *c, const char *name);
+int    is_method_hidden(SengClass *c, const char *name);
+int    val_is_circular(Value *v);
 
 void   val_ref  (Value *v);
 void   val_deref(Value *v);

@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include "lexer.h"
+#include "parser.h"
 
 /* ── constant pool ───────────────────────────────────────────── */
 typedef struct {
@@ -127,10 +129,27 @@ static void compile_expr(Ctx *c, Node *n) {
             break;
 
         case ND_CALL_EXPR:
-            for (int i = 0; i < n->call.args.count; i++)
-                compile_expr(c, n->call.args.items[i]);
-            emit(c, OP_LOAD, pool_add_str(c, n->call.name));
-            emit(c, OP_CALL, n->call.args.count);
+            if (n->call.obj) {
+                for (int i = 0; i < n->call.args.count; i++)
+                    compile_expr(c, n->call.args.items[i]);
+                compile_expr(c, n->call.obj);
+                emit(c, OP_METHOD_CALL, pool_add_str(c, n->call.name));
+                emit(c, OP_METHOD_CALL, n->call.args.count);
+            } else {
+                for (int i = 0; i < n->call.args.count; i++)
+                    compile_expr(c, n->call.args.items[i]);
+                emit(c, OP_LOAD, pool_add_str(c, n->call.name));
+                emit(c, OP_CALL, n->call.args.count);
+            }
+            break;
+
+        case ND_PROP_GET:
+            compile_expr(c, n->prop_get.obj);
+            emit(c, OP_GET_PROP, pool_add_str(c, n->prop_get.name));
+            break;
+
+        case ND_ME:
+            emit(c, OP_ME, 0);
             break;
 
         default:
@@ -242,12 +261,86 @@ static void compile_node(Ctx *c, Node *n) {
         }
 
         case ND_CALL_STMT:
-            for (int i = 0; i < n->call.args.count; i++)
-                compile_expr(c, n->call.args.items[i]);
-            emit(c, OP_LOAD, pool_add_str(c, n->call.name));
-            emit(c, OP_CALL, n->call.args.count);
+            if (n->call.obj) {
+                for (int i = 0; i < n->call.args.count; i++)
+                    compile_expr(c, n->call.args.items[i]);
+                compile_expr(c, n->call.obj);
+                emit(c, OP_METHOD_CALL, pool_add_str(c, n->call.name));
+                emit(c, OP_METHOD_CALL, n->call.args.count);
+            } else {
+                for (int i = 0; i < n->call.args.count; i++)
+                    compile_expr(c, n->call.args.items[i]);
+                emit(c, OP_LOAD, pool_add_str(c, n->call.name));
+                emit(c, OP_CALL, n->call.args.count);
+            }
             emit(c, OP_POP, 0);  /* discard return value */
             break;
+
+        case ND_CLASS: {
+            /* jump over methods */
+            int skip = emit(c, OP_JUMP, 0);
+            int *m_starts = (int *)xmalloc(sizeof(int) * (size_t)(n->klass.methods.count ? n->klass.methods.count : 1));
+            for (int i = 0; i < n->klass.methods.count; i++) {
+                Node *mn = n->klass.methods.items[i];
+                m_starts[i] = c->code_count;
+                compile_block(c, &mn->define.body);
+                emit(c, OP_PUSH_NULL, 0);
+                emit(c, OP_RET, 0);
+            }
+            patch(c, skip, c->code_count);
+
+            emit(c, OP_CLASS_DEF, pool_add_str(c, n->klass.name));
+            emit(c, OP_CLASS_DEF, n->klass.parent_name ? pool_add_str(c, n->klass.parent_name) : -1);
+            emit(c, OP_CLASS_DEF, n->klass.field_count);
+            for (int i = 0; i < n->klass.field_count; i++) {
+                emit(c, OP_CLASS_DEF, pool_add_str(c, n->klass.fields[i]));
+                emit(c, OP_CLASS_DEF, n->klass.field_hidden[i]);
+            }
+            emit(c, OP_CLASS_DEF, n->klass.methods.count);
+            for (int i = 0; i < n->klass.methods.count; i++) {
+                Node *mn = n->klass.methods.items[i];
+                emit(c, OP_CLASS_DEF, pool_add_str(c, mn->define.name));
+                emit(c, OP_CLASS_DEF, m_starts[i]);
+                emit(c, OP_CLASS_DEF, mn->define.param_count);
+                emit(c, OP_CLASS_DEF, n->klass.method_hidden[i]);
+                for (int j = 0; j < mn->define.param_count; j++)
+                    emit(c, OP_CLASS_DEF, pool_add_str(c, mn->define.params[j]));
+            }
+            free(m_starts);
+            break;
+        }
+
+        case ND_NEW:
+            for (int i = 0; i < n->instantiate.args.count; i++)
+                compile_expr(c, n->instantiate.args.items[i]);
+            emit(c, OP_NEW_INST, pool_add_str(c, n->instantiate.class_name));
+            emit(c, OP_NEW_INST, pool_add_str(c, n->instantiate.instance_name));
+            emit(c, OP_NEW_INST, n->instantiate.args.count);
+            break;
+
+        case ND_PROP_SET:
+            compile_expr(c, n->prop_set.expr);
+            compile_expr(c, n->prop_set.obj);
+            emit(c, OP_SET_PROP, pool_add_str(c, n->prop_set.name));
+            break;
+
+        case ND_IMPORT_PKG:
+            emit(c, OP_IMPORT, pool_add_str(c, n->str));
+            break;
+
+        case ND_IMPORT: {
+            char *src = read_file(n->str);
+            if (!src) fatal("cannot open import file '%s'", n->str);
+            Lexer  *lex  = lexer_new(src);
+            Parser *par  = parser_new(lex);
+            Node   *prog = parse(par);
+            compile_block(c, &prog->program);
+            node_free(prog);
+            parser_free(par);
+            lexer_free(lex);
+            free(src);
+            break;
+        }
 
         case ND_RETURN:
             compile_expr(c, n->ret);
@@ -265,6 +358,29 @@ static void compile_node(Ctx *c, Node *n) {
 
         case ND_STOP:  emit(c, OP_JUMP, -1); break;  /* -1 = break sentinel */
         case ND_SKIP:  emit(c, OP_JUMP, -2); break;  /* -2 = continue sentinel */
+
+        case ND_THROW:
+            compile_expr(c, n->throw_err.expr);
+            emit(c, OP_THROW, 0);
+            break;
+
+        case ND_TRY: {
+            int try_patch = emit(c, OP_TRY, 0);
+            compile_block(c, &n->try_catch.try_body);
+            emit(c, OP_END_TRY, 0);
+            int end_patch = emit(c, OP_JUMP, 0);
+
+            patch(c, try_patch, c->code_count);
+            /* Catch block starts here. OP_THROW leaves error on stack. */
+            if (n->try_catch.catch_var) {
+                emit(c, OP_STORE, pool_add_str(c, n->try_catch.catch_var));
+            } else {
+                emit(c, OP_POP, 0);
+            }
+            compile_block(c, &n->try_catch.catch_body);
+            patch(c, end_patch, c->code_count);
+            break;
+        }
 
         case ND_PROGRAM:
             compile_block(c, &n->program);

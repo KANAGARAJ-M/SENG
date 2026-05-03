@@ -1,0 +1,19 @@
+try
+    say "Step 1: Start"
+    throw "Custom Error Message"
+    say "Step 2: Should not see this"
+catch err
+    say "Caught: " + err
+end
+say "Step 3: End"
+
+define risky
+    say "Inside risky function"
+    throw "Error from function"
+end
+
+try
+    call risky
+catch e
+    say "Caught from function: " + e
+end

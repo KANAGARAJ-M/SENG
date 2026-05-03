@@ -6,7 +6,55 @@ Format: `[Version] — YYYY-MM-DD`
 
 ---
 
-## [1.0.0] — 2026-04-27
+## [1.0.2] — 2026-05-03
+
+### ✨ Major Features & Improvements
+
+#### 🏗️ Object-Oriented Programming (OOPS)
+- **Blueprints** — Define structured objects using the `blueprint` keyword.
+- **Encapsulation** — Use the `hidden` keyword for private members.
+- **Methods** — Define behaviors within blueprints.
+- **Inheritance** — Blueprints can inherit from others using `from`.
+- **Initialization** — Support for `init` constructor methods.
+
+#### 🛡️ Error Handling
+- **Try/Catch Blocks** — Structured exception handling using `try`, `catch`, and `throw`.
+- **Automatic Unwinding** — Safe environment and stack unwinding during exceptions in both interpreter and VM.
+
+#### 📚 Standard Library Expansion
+- **math** — Advanced math functions (sqrt, sin, cos, random, etc.).
+- **sys** — System interaction, including command-line arguments via `args()`.
+- **json** — Parse and stringify JSON data.
+- **string** — Rich set of string manipulation functions (upper, lower, replace, split, join, etc.).
+- **type** — Type checking and conversion utilities.
+- **io** — File system access (`read_file`, `write_file`, `file_exists`).
+
+#### 🛠️ Developer Tooling
+- **REPL** — Interactive shell accessible via `seng repl`.
+- **Disassembler** — Inspect compiled bytecode with `seng disasm <file.sec>`.
+- **Arguments** — Pass CLI arguments to SENG scripts.
+
+#### 🐧 Platform Support
+- **Linux** — Full official support for Linux systems.
+- **Windows** — Maintained stable support.
+
+### 🐛 Bug Fixes & Stability
+- **Circular References** — Implemented cycle-aware stringification and circularity detection for lists and instances.
+- **Parser Ambiguity** — Resolved `item ... of` ambiguity with property access.
+- **VM/Bytecode** — Added `OP_IMPORT` and file inlining during compilation.
+- **Memory Safety** — Fixed uninitialized recursion stacks in value stringification.
+- **OOP Ref-Counting** — Proper reference counting for instances and their members.
+
+---
+
+## [1.0.1] — 2026-05-01
+
+### 🔧 Minor Updates
+- Resolved various memory leaks in the Bytecode VM.
+- Improved error messages for invalid syntax.
+- Optimized list resizing logic.
+
+---
 
 ### 🎉 Initial Release
 
@@ -70,12 +118,9 @@ This is the first official public release of **seng — Simple English Programmi
 
 > These features are planned and subject to change.
 
-- [ ] Linux and macOS official support
-- [ ] Standard library: file I/O (`read file`, `write file`)
-- [ ] String methods: `length of`, `upper of`, `lower of`, `contains`
+- [ ] macOS official support
 - [ ] `for each item in list` loop syntax
 - [ ] Column-level error messages
-- [ ] REPL (interactive mode): `seng`
 - [ ] VS Code syntax highlighting extension
 
 ---

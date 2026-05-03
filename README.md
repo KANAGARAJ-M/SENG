@@ -42,9 +42,14 @@
 
 ---
 
+---
+
 <h2 align="center">🚀 Quick Start</h2>
 
 ```sh
+# Start an interactive REPL
+seng repl
+
 # Run a source file directly
 seng hello.se
 
@@ -53,6 +58,9 @@ seng compile hello.se      # → creates hello.sec
 
 # Run compiled bytecode
 seng run hello.sec
+
+# Disassemble bytecode
+seng disasm hello.sec
 ```
 
 ---
@@ -130,27 +138,121 @@ say item 1 of fruits
 </details>
 
 <details>
-<summary><b>🏛️ Object-Oriented Programming (Blueprints)</b></summary>
+<summary><b>🏗️ Object-Oriented Programming (Blueprints)</b></summary>
 
 ```seng
-# Define a blueprint
-create blueprint Person
+blueprint Person
     has name
     has age
+    hidden has secret
 
     define init with n and a
-        set name of me to n
-        set age of me to a
+        set me of name to n
+        set me of age to a
+        set me of secret to "hush!"
     end
 
     define greet
-        say "Hello, I am " + name of me
+        say "Hello, I am " + me of name
     end
 end
 
-# Create an instance
-create instance of Person called p1 with "Alice" and 30
-call greet of p1
+instance of Person called alice with "Alice" and 30
+call greet of alice
+```
+</details>
+
+<details>
+<summary><b>🛡️ Error Handling</b></summary>
+
+```seng
+try
+    throw "Something went wrong!"
+catch err
+    say "Caught error: " + err
+end
+```
+</details>
+
+<details>
+<summary><b>📚 Standard Library</b></summary>
+
+```seng
+import math
+import json
+import sys
+
+say result of sqrt with 144
+set obj to result of json_parse with "{\"key\": \"val\"}"
+say result of args
+```
+</details>
+
+---
+
+<h2 align="center">📦 Standard Library Packages</h2>
+
+SENG v1.0.2 includes several built-in packages:
+
+- **math** — `sqrt`, `sin`, `cos`, `random`, `pi`, etc.
+- **sys** — `args()`, `exit()`, `sleep()`.
+- **json** — `json_parse()`, `json_stringify()`.
+- **string** — `upper()`, `lower()`, `replace()`, `split()`, `join()`.
+- **type** — `type_of()`, `to_str()`, `to_num()`.
+- **io** — `read_file()`, `write_file()`, `file_exists()`.
+
+---
+
+<details>
+<summary><b>🔒 Encapsulation (Hidden Members)</b></summary>
+
+SENG provides the `hidden` keyword for private class members. These members can only be accessed within the blueprint itself (using `me`).
+
+```seng
+create blueprint BankAccount
+    hidden has balance
+    
+    define init with amount
+        set balance of me to amount
+    end
+    
+    define getBalance
+        say "Balance: " + balance of me
+    end
+end
+
+create instance of BankAccount called myAcc with 1000
+# say balance of myAcc  <-- This would fail!
+call getBalance of myAcc
+```
+</details>
+
+<details>
+<summary><b>⚠️ Error Handling (Try/Catch)</b></summary>
+
+Gracefully handle runtime errors using `try`, `catch`, and `throw`.
+
+```seng
+try
+    say "Processing..."
+    throw "Connection failed!"
+catch err
+    say "Caught error: " + err
+end
+```
+</details>
+
+<details>
+<summary><b>🛠️ Standard Library (Packages)</b></summary>
+
+Import built-in functionality for math, sys, and more.
+
+```seng
+import math
+say result of sqrt of 16  # 4
+
+import sys
+say result of args        # List of command line arguments
 ```
 </details>
 

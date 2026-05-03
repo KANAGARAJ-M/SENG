@@ -56,9 +56,12 @@ void node_free(Node *n) {
             break;
         case ND_CLASS:
             free(n->klass.name);
+            free(n->klass.parent_name);
             for (int i = 0; i < n->klass.field_count; i++) free(n->klass.fields[i]);
             free(n->klass.fields);
+            free(n->klass.field_hidden);
             node_list_free(&n->klass.methods);
+            free(n->klass.method_hidden);
             break;
         case ND_NEW:
             free(n->instantiate.class_name);
@@ -73,6 +76,14 @@ void node_free(Node *n) {
             free(n->prop_set.name);
             node_free(n->prop_set.obj);
             node_free(n->prop_set.expr);
+            break;
+        case ND_TRY:
+            node_list_free(&n->try_catch.try_body);
+            free(n->try_catch.catch_var);
+            node_list_free(&n->try_catch.catch_body);
+            break;
+        case ND_THROW:
+            node_free(n->throw_err.expr);
             break;
         case ND_ME: break;
         default: break;

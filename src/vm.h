@@ -4,5 +4,6 @@
 
 /* Run a .sec bytecode file */
 void vm_run_file(const char *path);
+void vm_disasm  (const char *path);
 
 #endif /* SENG_VM_H */

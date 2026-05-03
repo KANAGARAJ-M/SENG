@@ -1,4 +1,5 @@
 
+#define _POSIX_C_SOURCE 200809L
 #include "packages.h"
 #include "value.h"
 #include "env.h"
@@ -490,6 +491,12 @@ static Value *nat_type_of(Value **a, int n) {
     }
 }
 
+static Value *nat_is_circular(Value **a, int n) {
+    (void)n;
+    if (!a[0]) return val_bool(0);
+    return val_bool(val_is_circular(a[0]));
+}
+
 static SengNative type_fns[] = {
     {"to_num",      nat_to_num,      1},
     {"to_str",      nat_to_str,      1},
@@ -499,6 +506,7 @@ static SengNative type_fns[] = {
     {"is_list_val", nat_is_list_val, 1},
     {"is_nothing",  nat_is_nothing,  1},
     {"type_of",     nat_type_of,     1},
+    {"is_circular", nat_is_circular, 1},
     {NULL, NULL, 0}
 };
 
@@ -659,6 +667,23 @@ static void pkg_http(Env *g) {
    sys package
    ═══════════════════════════════════════════════════════════════ */
 
+static int   sys_argc = 0;
+static char **sys_argv = NULL;
+
+void pkg_set_args(int argc, char **argv) {
+    sys_argc = argc;
+    sys_argv = argv;
+}
+
+static Value *nat_args(Value **a, int n) {
+    (void)a; (void)n;
+    Value *list = val_list();
+    for (int i = 0; i < sys_argc; i++) {
+        list_push(list, val_str(xstrdup(sys_argv[i])));
+    }
+    return list;
+}
+
 static Value *nat_sleep_ms(Value **a, int n) {
     (void)n; require_num(a[0],1,"sleep_ms");
     int ms = (int)a[0]->num; if (ms < 0) ms = 0;
@@ -728,6 +753,7 @@ static SengNative sys_fns[] = {
     {"env_get",   nat_env_get,   1},
     {"run_cmd",   nat_run_cmd,   1},
     {"exit_code", nat_exit_code, 1},
+    {"args",      nat_args,      0},
     {NULL, NULL, 0}
 };
 

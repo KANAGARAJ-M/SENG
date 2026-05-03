@@ -9,7 +9,7 @@
 #include <stdarg.h>
 #include <ctype.h>
 
-#define SENG_VERSION "1.0.0"
+#define SENG_VERSION "1.0.2"
 #define SENG_MAGIC   "SENG"
 #define SENG_SEC_VER  1
 

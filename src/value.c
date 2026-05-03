@@ -98,61 +98,125 @@ int val_truthy(const Value *v) {
     }
 }
 
-char *val_to_string(const Value *v) {
+static void append_str(char **dest, const char *src) {
+    if (!src) return;
+    size_t dl = *dest ? strlen(*dest) : 0;
+    size_t sl = strlen(src);
+    *dest = (char *)xrealloc(*dest, dl + sl + 1);
+    strcpy((*dest) + dl, src);
+}
+
+static int check_circular(Value *v, Value **stack, int depth) {
+    if (!v || (v->type != VAL_LIST && v->type != VAL_INSTANCE)) return 0;
+    if (depth > 128) return 1;
+    for (int i = 0; i < depth; i++) if (stack[i] == v) return 1;
+    stack[depth] = v;
+    if (v->type == VAL_LIST) {
+        for (int i = 0; i < v->list->count; i++)
+            if (check_circular(v->list->items[i], stack, depth + 1)) return 1;
+    } else {
+        for (int i = 0; i < v->instance->klass->field_count; i++)
+            if (check_circular(v->instance->fields[i], stack, depth + 1)) return 1;
+    }
+    return 0;
+}
+
+int val_is_circular(Value *v) {
+    Value *stack[130] = {0};
+    return check_circular(v, stack, 0);
+}
+
+static char *vts_rec(const Value *v, Value **stack, int depth) {
     if (!v) return xstrdup("nothing");
+    if (depth > 32) return xstrdup("...");
+    for (int i = 0; i < depth; i++) {
+        if (stack[i] == v) return xstrdup(v->type == VAL_LIST ? "[...]" : "<...>");
+    }
+    stack[depth] = (Value *)v;
+
     char buf[64];
     switch (v->type) {
         case VAL_NULL: return xstrdup("nothing");
         case VAL_BOOL: return xstrdup(v->bool_val ? "true" : "false");
         case VAL_STR:  return xstrdup(v->str);
-        case VAL_FUNC: {
+        case VAL_FUNC:
             snprintf(buf, sizeof buf, "<function %s>", v->func ? v->func->name : "?");
             return xstrdup(buf);
-        }
-        case VAL_NATIVE: {
+        case VAL_NATIVE:
             snprintf(buf, sizeof buf, "<builtin %s>", v->native ? v->native->name : "?");
             return xstrdup(buf);
-        }
-        case VAL_CLASS: {
+        case VAL_CLASS:
             snprintf(buf, sizeof buf, "<blueprint %s>", v->klass ? v->klass->name : "?");
             return xstrdup(buf);
-        }
         case VAL_INSTANCE: {
-            snprintf(buf, sizeof buf, "<instance of %s>", (v->instance && v->instance->klass) ? v->instance->klass->name : "?");
-            return xstrdup(buf);
+            char *res = xstrdup("<instance of ");
+            append_str(&res, v->instance->klass->name);
+            append_str(&res, " {");
+            for (int i = 0; i < v->instance->klass->field_count; i++) {
+                append_str(&res, v->instance->klass->fields[i]);
+                append_str(&res, ": ");
+                char *s = vts_rec(v->instance->fields[i], stack, depth + 1);
+                append_str(&res, s); free(s);
+                if (i < v->instance->klass->field_count - 1) append_str(&res, ", ");
+            }
+            append_str(&res, "}>");
+            return res;
         }
-        case VAL_NUM: {
-            /* print without trailing .0 when it's a whole number */
+        case VAL_NUM:
             if (v->num == (long long)v->num && v->num >= -1e15 && v->num <= 1e15)
                 snprintf(buf, sizeof buf, "%lld", (long long)v->num);
             else
                 snprintf(buf, sizeof buf, "%g", v->num);
             return xstrdup(buf);
-        }
         case VAL_LIST: {
-            /* [1, 2, 3] */
             char *res = xstrdup("[");
             for (int i = 0; i < v->list->count; i++) {
-                char *s = val_to_string(v->list->items[i]);
-                size_t rl = strlen(res), sl = strlen(s);
-                res = (char *)xrealloc(res, rl + sl + 3);
-                strcat(res, s);
-                if (i < v->list->count - 1) strcat(res, ", ");
-                free(s);
+                char *s = vts_rec(v->list->items[i], stack, depth + 1);
+                append_str(&res, s); free(s);
+                if (i < v->list->count - 1) append_str(&res, ", ");
             }
-            size_t rl = strlen(res);
-            res = (char *)xrealloc(res, rl + 2);
-            strcat(res, "]");
+            append_str(&res, "]");
             return res;
         }
         default: return xstrdup("?");
     }
 }
 
+char *val_to_string(const Value *v) {
+    Value *stack[64] = {0};
+    return vts_rec(v, stack, 0);
+}
+
 void val_print(const Value *v) {
     char *s = val_to_string(v);
     printf("%s\n", s);
     free(s);
+}
+
+int find_field(SengClass *c, const char *name) {
+    for (int i = 0; i < c->field_count; i++)
+        if (strcmp(c->fields[i], name) == 0) return i;
+    return -1;
+}
+
+Value *find_method(SengClass *c, const char *name) {
+    while (c) {
+        for (int i = 0; i < c->method_count; i++) {
+            if (strcmp(c->methods[i].name, name) == 0) return c->methods[i].method;
+        }
+        c = c->parent;
+    }
+    return NULL;
+}
+
+int is_method_hidden(SengClass *c, const char *name) {
+    while (c) {
+        for (int i = 0; i < c->method_count; i++) {
+            if (strcmp(c->methods[i].name, name) == 0) return c->methods[i].hidden;
+        }
+        c = c->parent;
+    }
+    return 0;
 }
 
 Value *val_copy(const Value *src) {

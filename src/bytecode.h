@@ -52,6 +52,16 @@ typedef enum {
     OP_LIST_LEN,    /* push length of list constants[op]        */
     OP_POP,
     OP_DEF_FUNC,    /* op=name-idx, next = param_count, then param name idxes */
+    OP_CLASS_DEF,   /* op=name-idx, next=field-count, then next=method-count, then methods */
+    OP_NEW_INST,    /* op=class-name-idx, next=instance-name-idx, next=arg-count */
+    OP_GET_PROP,    /* op=prop-name-idx, obj on stack                    */
+    OP_SET_PROP,    /* op=prop-name-idx, obj and val on stack            */
+    OP_ME,          /* push 'me' instance                                */
+    OP_METHOD_CALL, /* op=method-name-idx, next=arg-count, obj on stack  */
+    OP_TRY,         /* op=catch-jump-offset                              */
+    OP_THROW,       /* pop error value and jump to current catch         */
+    OP_END_TRY,     /* pop catch frame                                   */
+    OP_IMPORT,      /* op=package-name-index                             */
     OP_COUNT
 } Opcode;
 

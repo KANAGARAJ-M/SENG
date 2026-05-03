@@ -1,9 +1,9 @@
-
 #include "vm.h"
 #include "bytecode.h"
 #include "value.h"
 #include "env.h"
 #include "common.h"
+#include "packages.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -36,6 +36,23 @@ static Value *pop(Stack *s) {
     s->top = idx;
     return s->data[idx];
 }
+
+/* ── class record in VM ──────────────────────────────────────── */
+typedef struct VmClass {
+    char           *name;
+    struct VmClass *parent;
+    int             field_count;
+    char          **fields;
+    int            *field_hidden;
+    int             method_count;
+    struct {
+        char *name;
+        int   body_start;
+        int   param_count;
+        int   hidden;
+        int  *param_idxs;
+    } *methods;
+} VmClass;
 
 /* ── function record in VM ───────────────────────────────────── */
 typedef struct {
@@ -85,9 +102,11 @@ void vm_run_file(const char *path) {
     }
     fclose(f);
 
-    /* ── scan for function definitions ── */
+    /* ── scan for definitions ── */
     int      func_count = 0, func_cap = 0;
     VmFunc  *funcs = NULL;
+    int      class_count = 0, class_cap = 0;
+    VmClass *classes = NULL;
 
     for (uint32_t i = 0; i < code_count; i++) {
         if (code[i].op == OP_DEF_FUNC) {
@@ -99,16 +118,49 @@ void vm_run_file(const char *path) {
                 func_cap = func_cap ? func_cap * 2 : 4;
                 funcs = (VmFunc *)xrealloc(funcs, sizeof(VmFunc) * (size_t)func_cap);
             }
-            VmFunc fn;
-            fn.name        = pool_str[name_idx];
-            fn.body_start  = body_start;
-            fn.param_count = pcount;
-            fn.param_idxs  = (int *)xmalloc(sizeof(int) * (size_t)(pcount ? pcount : 1));
+            funcs[func_count].name        = pool_str[name_idx];
+            funcs[func_count].body_start  = body_start;
+            funcs[func_count].param_count = pcount;
+            funcs[func_count].param_idxs  = (int *)xmalloc(sizeof(int) * (size_t)(pcount ? pcount : 1));
             for (int pi = 0; pi < pcount; pi++) {
                 i++;
-                fn.param_idxs[pi] = code[i].arg;
+                funcs[func_count].param_idxs[pi] = code[i].arg;
             }
-            funcs[func_count++] = fn;
+            func_count++;
+        } else if (code[i].op == OP_CLASS_DEF) {
+            int name_idx = code[i].arg; i++;
+            int parent_idx = code[i].arg; i++;
+            int fcount = code[i].arg;
+            if (class_count >= class_cap) {
+                class_cap = class_cap ? class_cap * 2 : 4;
+                classes = (VmClass *)xrealloc(classes, sizeof(VmClass) * (size_t)class_cap);
+            }
+            VmClass *c = &classes[class_count++];
+            memset(c, 0, sizeof(*c));
+            c->name = pool_str[name_idx];
+            if (parent_idx >= 0) {
+                const char *pname = pool_str[parent_idx];
+                for (int j = 0; j < class_count - 1; j++) {
+                    if (strcmp(classes[j].name, pname) == 0) { c->parent = &classes[j]; break; }
+                }
+            }
+            c->field_count = fcount;
+            c->fields = (char **)xmalloc(sizeof(char *) * (size_t)(fcount ? fcount : 1));
+            c->field_hidden = (int *)xmalloc(sizeof(int) * (size_t)(fcount ? fcount : 1));
+            for (int fi = 0; fi < fcount; fi++) {
+                i++; c->fields[fi] = pool_str[code[i].arg];
+                i++; c->field_hidden[fi] = code[i].arg;
+            }
+            i++; c->method_count = code[i].arg;
+            c->methods = xcalloc((size_t)(c->method_count ? c->method_count : 1), sizeof(*c->methods));
+            for (int mi = 0; mi < c->method_count; mi++) {
+                i++; c->methods[mi].name = pool_str[code[i].arg];
+                i++; c->methods[mi].body_start = code[i].arg;
+                i++; c->methods[mi].param_count = code[i].arg;
+                i++; c->methods[mi].hidden = code[i].arg;
+                c->methods[mi].param_idxs = xmalloc(sizeof(int) * (size_t)(c->methods[mi].param_count ? c->methods[mi].param_count : 1));
+                for (int pi = 0; pi < c->methods[mi].param_count; pi++) { i++; c->methods[mi].param_idxs[pi] = code[i].arg; }
+            }
         }
     }
 
@@ -125,10 +177,56 @@ void vm_run_file(const char *path) {
                           (size_t)(sf->param_count ? sf->param_count : 1));
         for (int pi = 0; pi < sf->param_count; pi++)
             sf->params[pi] = xstrdup(pool_str[funcs[i].param_idxs[pi]]);
-        sf->body_ref = (void *)(intptr_t)funcs[i].body_start;  /* not used in VM path */
+        sf->body_ref = (void *)(intptr_t)funcs[i].body_start;
         Value *fv = val_func(sf);
         env_set(globals, sf->name, fv);
         val_deref(fv);
+    }
+    
+    /* register classes */
+    for (int i = 0; i < class_count; i++) {
+        SengClass *sc = (SengClass *)xcalloc(1, sizeof(SengClass));
+        sc->name = xstrdup(classes[i].name);
+        if (classes[i].parent) {
+            /* find registered parent */
+            Value *pv = env_get(globals, classes[i].parent->name);
+            if (pv && pv->type == VAL_CLASS) sc->parent = pv->klass;
+            sc->field_count = sc->parent->field_count + classes[i].field_count;
+            sc->fields = xmalloc(sizeof(char *) * (size_t)(sc->field_count ? sc->field_count : 1));
+            sc->field_hidden = xmalloc(sizeof(int) * (size_t)(sc->field_count ? sc->field_count : 1));
+            for (int j = 0; j < sc->parent->field_count; j++) {
+                sc->fields[j] = xstrdup(sc->parent->fields[j]);
+                sc->field_hidden[j] = sc->parent->field_hidden[j];
+            }
+            for (int j = 0; j < classes[i].field_count; j++) {
+                sc->fields[sc->parent->field_count + j] = xstrdup(classes[i].fields[j]);
+                sc->field_hidden[sc->parent->field_count + j] = classes[i].field_hidden[j];
+            }
+        } else {
+            sc->field_count = classes[i].field_count;
+            sc->fields = xmalloc(sizeof(char *) * (size_t)(sc->field_count ? sc->field_count : 1));
+            sc->field_hidden = xmalloc(sizeof(int) * (size_t)(sc->field_count ? sc->field_count : 1));
+            for (int j = 0; j < sc->field_count; j++) {
+                sc->fields[j] = xstrdup(classes[i].fields[j]);
+                sc->field_hidden[j] = classes[i].field_hidden[j];
+            }
+        }
+        sc->method_count = classes[i].method_count;
+        sc->methods = xcalloc((size_t)(sc->method_count ? sc->method_count : 1), sizeof(*sc->methods));
+        for (int j = 0; j < sc->method_count; j++) {
+            sc->methods[j].name = xstrdup(classes[i].methods[j].name);
+            sc->methods[j].hidden = classes[i].methods[j].hidden;
+            SengFunc *sf = (SengFunc *)xcalloc(1, sizeof(SengFunc));
+            sf->name = xstrdup(sc->methods[j].name);
+            sf->param_count = classes[i].methods[j].param_count;
+            sf->params = xmalloc(sizeof(char *) * (size_t)(sf->param_count ? sf->param_count : 1));
+            for (int k = 0; k < sf->param_count; k++) sf->params[k] = xstrdup(pool_str[classes[i].methods[j].param_idxs[k]]);
+            sf->body_ref = (void *)(intptr_t)classes[i].methods[j].body_start;
+            sc->methods[j].method = val_func(sf);
+        }
+        Value *cv = val_class(sc);
+        env_set(globals, sc->name, cv);
+        val_deref(cv);
     }
 
     /* ── call stack for functions ── */
@@ -136,6 +234,11 @@ void vm_run_file(const char *path) {
     CallFrame call_stack[256];
     int       call_top = 0;
     Env      *cur_env  = globals;
+
+    /* ── exception stack ── */
+    typedef struct { int catch_pc; int call_depth; int stack_top; } CatchFrame;
+    CatchFrame catch_stack[64];
+    int        catch_top = 0;
 
     int32_t pc = 0;
     while ((uint32_t)pc < code_count) {
@@ -290,7 +393,27 @@ void vm_run_file(const char *path) {
             case OP_CALL: {
                 /* top of stack = function value, below = args (arg = count) */
                 Value *fv = pop(&stk);
-                if (!fv || fv->type != VAL_FUNC)
+                if (!fv) fatal("attempted to call a null value");
+                
+                if (fv->type == VAL_NATIVE) {
+                    SengNative *nat = fv->native;
+                    if (nat->arity != -1 && arg != nat->arity)
+                        fatal("'%s': expected %d args, got %d", nat->name, nat->arity, arg);
+                    
+                    /* Collect args */
+                    Value **args = (Value **)xmalloc(sizeof(Value *) * (size_t)(arg ? arg : 1));
+                    for (int i = arg - 1; i >= 0; i--) args[i] = pop(&stk);
+                    
+                    Value *res = nat->fn(args, arg);
+                    for (int i = 0; i < arg; i++) val_deref(args[i]);
+                    free(args);
+                    
+                    push(&stk, res);
+                    val_deref(fv);
+                    break;
+                }
+
+                if (fv->type != VAL_FUNC)
                     fatal("attempted to call a non-function");
                 SengFunc *fn = fv->func;
                 if (arg != fn->param_count)
@@ -299,9 +422,14 @@ void vm_run_file(const char *path) {
 
                 /* find body start */
                 int body = -1;
-                for (int fi = 0; fi < func_count; fi++) {
-                    if (strcmp(funcs[fi].name, fn->name) == 0) {
-                        body = funcs[fi].body_start; break;
+                /* If body_ref is set (e.g. from blueprint method), use it directly */
+                if (fn->body_ref) {
+                    body = (int)(intptr_t)fn->body_ref;
+                } else {
+                    for (int fi = 0; fi < func_count; fi++) {
+                        if (strcmp(funcs[fi].name, fn->name) == 0) {
+                            body = funcs[fi].body_start; break;
+                        }
                     }
                 }
                 if (body < 0) fatal("function '%s' body not found", fn->name);
@@ -326,8 +454,21 @@ void vm_run_file(const char *path) {
 
             case OP_RET: {
                 Value *rv = pop(&stk);
+                
+                /* clean up any active catch frames in this function */
+                while (catch_top > 0 && catch_stack[catch_top-1].call_depth == call_top) {
+                    catch_top--;
+                }
+
                 if (call_top <= 0) { push(&stk, rv); goto done; }
                 CallFrame fr = call_stack[--call_top];
+                
+                /* clean up arguments from stack */
+                while (stk.top > fr.ret_sp) {
+                    Value *v = pop(&stk);
+                    val_deref(v);
+                }
+                
                 env_free(cur_env);
                 cur_env = fr.ret_env;
                 pc      = fr.ret_pc;
@@ -378,14 +519,182 @@ void vm_run_file(const char *path) {
             }
 
             case OP_DEF_FUNC:
-                /* already scanned; skip the extra OP_DEF_FUNC operand instructions */
-                /* peek arg = body_start, then skip param_count + params */
+            case OP_CLASS_DEF:
+                /* already scanned; skip metadata */
                 {
-                    pc++;                         /* skip body_start instr  */
-                    int pc2 = code[pc].arg; pc++; /* get param count        */
-                    pc += pc2;                    /* skip param name instrs */
+                    if (op == OP_DEF_FUNC) {
+                        /* OP_DEF_FUNC: name, body_start, pcount, params... */
+                        int pcount = code[pc+1].arg;
+                        pc += 2 + pcount;
+                    } else {
+                        /* OP_CLASS_DEF: name, parent, fcount, (fname, fhidden)..., mcount, (mname, mbody, mpcount, mhidden, mparams...)... */
+                        pc++; /* skip parent */
+                        int fcount = code[pc].arg; pc++;
+                        pc += fcount * 2;
+                        int mcount = code[pc].arg; pc++;
+                        for (int mi=0; mi<mcount; mi++) {
+                            pc += 2; /* skip mname, mbody */
+                            int mpcount = code[pc].arg; pc++;
+                            pc++; /* skip mhidden */
+                            pc += mpcount;
+                        }
+                    }
                 }
                 break;
+
+            case OP_NEW_INST: {
+                const char *cname = pool_str[arg];
+                const char *iname = pool_str[code[pc].arg]; pc++;
+                int acount = code[pc].arg; pc++;
+                Value *cv = env_get(globals, cname);
+                if (!cv || cv->type != VAL_CLASS) fatal("'%s' is not a blueprint", cname);
+                SengClass *klass = cv->klass;
+                SengInstance *inst = (SengInstance *)xcalloc(1, sizeof(SengInstance));
+                inst->klass = klass;
+                inst->fields = (Value **)xcalloc((size_t)klass->field_count, sizeof(Value *));
+                for (int i=0; i<klass->field_count; i++) inst->fields[i] = val_null();
+                Value *iv = val_instance(inst);
+                env_set(cur_env, iname, iv);
+                
+                /* constructor? */
+                Value *init_fn = find_method(klass, "init");
+                if (init_fn) {
+                    if (call_top >= 256) fatal("call stack overflow");
+                    call_stack[call_top++] = (CallFrame){pc, cur_env, stk.top - acount};
+                    Env *fenv = env_new(globals);
+                    SengFunc *fn = init_fn->func;
+                    for (int pi = fn->param_count - 1; pi >= 0; pi--) {
+                        Value *av = pop(&stk);
+                        env_set(fenv, fn->params[pi], av);
+                        val_deref(av);
+                    }
+                    env_set(fenv, "me", iv);
+                    cur_env = fenv;
+                    pc = (int)(intptr_t)fn->body_ref;
+                }
+                val_deref(iv);
+                break;
+            }
+
+            case OP_GET_PROP: {
+                Value *obj = pop(&stk);
+                if (!obj || obj->type != VAL_INSTANCE) fatal("expected an instance for property get");
+                int idx = find_field(obj->instance->klass, pool_str[arg]);
+                if (idx < 0) fatal("instance of '%s' has no field '%s'", obj->instance->klass->name, pool_str[arg]);
+                
+                if (obj->instance->klass->field_hidden[idx]) {
+                    Value *me = env_get(cur_env, "me");
+                    if (!me || me->type != VAL_INSTANCE || me->instance != obj->instance)
+                        fatal("cannot access hidden field '%s' outside of its blueprint", pool_str[arg]);
+                }
+
+                push(&stk, val_copy(obj->instance->fields[idx]));
+                val_deref(obj);
+                break;
+            }
+
+            case OP_SET_PROP: {
+                Value *obj = pop(&stk);
+                Value *val = pop(&stk);
+                if (!obj || obj->type != VAL_INSTANCE) fatal("expected an instance for property set");
+                int idx = find_field(obj->instance->klass, pool_str[arg]);
+                if (idx < 0) fatal("instance of '%s' has no field '%s'", obj->instance->klass->name, pool_str[arg]);
+
+                if (obj->instance->klass->field_hidden[idx]) {
+                    Value *me = env_get(cur_env, "me");
+                    if (!me || me->type != VAL_INSTANCE || me->instance != obj->instance)
+                        fatal("cannot set hidden field '%s' outside of its blueprint", pool_str[arg]);
+                }
+
+                val_deref(obj->instance->fields[idx]);
+                obj->instance->fields[idx] = val_copy(val);
+                val_deref(val);
+                val_deref(obj);
+                break;
+            }
+
+            case OP_ME: {
+                Value *v = env_get(cur_env, "me");
+                if (!v) fatal("'me' is not defined in this context");
+                push(&stk, val_copy(v));
+                break;
+            }
+
+            case OP_METHOD_CALL: {
+                const char *mname = pool_str[arg];
+                int acount = code[pc].arg; pc++;
+                Value *obj = pop(&stk);
+                if (!obj || obj->type != VAL_INSTANCE) fatal("expected an instance for method call");
+
+                if (is_method_hidden(obj->instance->klass, mname)) {
+                    Value *me = env_get(cur_env, "me");
+                    if (!me || me->type != VAL_INSTANCE || me->instance != obj->instance)
+                        fatal("cannot call hidden method '%s' outside of its blueprint", mname);
+                }
+
+                Value *mv = find_method(obj->instance->klass, mname);
+                if (!mv || mv->type != VAL_FUNC) fatal("instance has no method '%s'", mname);
+                
+                SengFunc *fn = mv->func;
+                if (call_top >= 256) fatal("call stack overflow");
+                call_stack[call_top++] = (CallFrame){pc, cur_env, stk.top - acount};
+                Env *fenv = env_new(globals);
+                for (int pi = fn->param_count - 1; pi >= 0; pi--) {
+                    Value *av = pop(&stk);
+                    env_set(fenv, fn->params[pi], av);
+                    val_deref(av);
+                }
+                env_set(fenv, "me", obj);
+                cur_env = fenv;
+                pc = (int)(intptr_t)fn->body_ref;
+                val_deref(obj);
+                break;
+            }
+
+            case OP_TRY: {
+                if (catch_top >= 64) fatal("exception stack overflow");
+                catch_stack[catch_top++] = (CatchFrame){arg, call_top, stk.top};
+                break;
+            }
+
+            case OP_THROW: {
+                Value *err = pop(&stk);
+                if (catch_top <= 0) {
+                    char *s = val_to_string(err);
+                    fprintf(stderr, "seng error: uncaught throw: %s\n", s);
+                    free(s);
+                    val_deref(err);
+                    goto done;
+                }
+                CatchFrame cf = catch_stack[--catch_top];
+                /* unwind call stack */
+                while (call_top > cf.call_depth) {
+                    CallFrame fr = call_stack[--call_top];
+                    env_free(cur_env);
+                    cur_env = fr.ret_env;
+                }
+                /* unwind value stack */
+                while (stk.top > cf.stack_top) {
+                    Value *v = pop(&stk);
+                    val_deref(v);
+                }
+                push(&stk, err); /* error value for catch */
+                pc = cf.catch_pc;
+                break;
+            }
+
+            case OP_END_TRY: {
+                if (catch_top > 0) catch_top--;
+                break;
+            }
+
+            case OP_IMPORT: {
+                const char *pkg_name = pool_str[arg];
+                if (!pkg_register(globals, pkg_name)) {
+                    fatal("unknown package '%s'", pkg_name);
+                }
+                break;
+            }
 
             default:
                 fatal("unknown opcode %d", op);
@@ -400,4 +709,48 @@ done:
     for (uint32_t i = 0; i < pool_count; i++) if (pool_is_str[i]) free(pool_str[i]);
     free(pool_str); free(pool_num); free(pool_is_str);
     free(code);
+}
+
+static const char *op_names[] = {
+    "PUSH_NUM", "PUSH_STR", "PUSH_TRUE", "PUSH_FALSE", "PUSH_NULL",
+    "LOAD", "STORE", "ADD", "SUB", "MUL", "DIV", "MOD", "NEG", "NOT",
+    "CMP_EQ", "CMP_NEQ", "CMP_GT", "CMP_LT", "CMP_GTE", "CMP_LTE",
+    "AND", "OR", "PRINT", "INPUT", "JUMP", "JUMP_FALSE", "CALL", "RET", "HALT",
+    "LIST_NEW", "LIST_PUSH", "LIST_GET", "LIST_LEN", "POP",
+    "DEF_FUNC", "CLASS_DEF", "NEW_INST", "GET_PROP", "SET_PROP", "ME", "METHOD_CALL",
+    "TRY", "THROW", "END_TRY", "IMPORT"
+};
+
+void vm_disasm(const char *path) {
+    FILE *f = fopen(path, "rb");
+    if (!f) fatal("cannot open '%s'", path);
+    char magic[4]; fread(magic, 1, 4, f);
+    if (memcmp(magic, SEC_MAGIC, 4) != 0) fatal("not a seng bytecode file");
+    uint8_t ver = read_u8(f);
+    if (ver != SEC_VERSION) fatal("bytecode version mismatch");
+
+    uint32_t cp_count = read_u32(f);
+    printf("--- Constant Pool (%u) ---\n", cp_count);
+    for (uint32_t i = 0; i < cp_count; i++) {
+        uint8_t type = read_u8(f);
+        if (type == 0) {
+            double v = read_f64(f);
+            printf("%4u: NUMBER %g\n", i, v);
+        } else {
+            uint32_t len = read_u32(f);
+            char *s = (char *)xmalloc(len + 1);
+            fread(s, 1, len, f); s[len] = '\0';
+            printf("%4u: STRING \"%s\"\n", i, s);
+            free(s);
+        }
+    }
+
+    uint32_t code_count = read_u32(f);
+    printf("\n--- Instructions (%u) ---\n", code_count);
+    for (uint32_t i = 0; i < code_count; i++) {
+        uint8_t op = read_u8(f);
+        int32_t arg = read_i32(f);
+        printf("%4u: %-12s %d\n", i, (op < OP_COUNT) ? op_names[op] : "???", arg);
+    }
+    fclose(f);
 }

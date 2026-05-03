@@ -1,0 +1,12 @@
+create blueprint Secret
+    hidden has password
+    has username
+    
+    define init with u and p
+        set username of me to u
+        set password of me to p
+    end
+end
+
+create instance of Secret called s with "admin" and "1234"
+say password of s # THIS SHOULD FAIL
