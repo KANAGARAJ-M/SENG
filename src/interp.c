@@ -42,6 +42,72 @@ static char *concat_vals(Value *a, Value *b, int line) {
     return r;
 }
 
+static int find_field(SengClass *c, const char *name) {
+    for (int i = 0; i < c->field_count; i++)
+        if (strcmp(c->fields[i], name) == 0) return i;
+    return -1;
+}
+
+static Value *find_method(SengClass *c, const char *name) {
+    for (int i = 0; i < c->method_count; i++)
+        if (strcmp(c->methods[i].name, name) == 0) return c->methods[i].method;
+    return NULL;
+}
+
+static SengFunc *make_func(Node *n) {
+    SengFunc *fn = (SengFunc *)xcalloc(1, sizeof(SengFunc));
+    fn->name        = xstrdup(n->define.name);
+    fn->param_count = n->define.param_count;
+    fn->params      = (char **)xmalloc(sizeof(char *) *
+                      (size_t)(fn->param_count ? fn->param_count : 1));
+    for (int i = 0; i < fn->param_count; i++)
+        fn->params[i] = xstrdup(n->define.params[i]);
+    fn->body_ref = &n->define.body;
+    return fn;
+}
+
+static Value *call_func(Interp *in, Env *e, Value *fv, NodeList *arg_nodes, Value *me_val, int line) {
+    if (!fv || (fv->type != VAL_FUNC && fv->type != VAL_NATIVE))
+        fatal("line %d: value is not a function", line);
+
+    int argc = arg_nodes->count;
+
+    /* native */
+    if (fv->type == VAL_NATIVE) {
+        SengNative *nat = fv->native;
+        if (nat->arity >= 0 && argc != nat->arity)
+            fatal("line %d: '%s' expects %d argument(s), got %d", line, nat->name, nat->arity, argc);
+        Value **args = (Value **)xmalloc(sizeof(Value *) * (size_t)(argc > 0 ? argc : 1));
+        for (int i = 0; i < argc; i++) args[i] = eval(in, e, arg_nodes->items[i]);
+        Value *rv = nat->fn(args, argc);
+        for (int i = 0; i < argc; i++) val_deref(args[i]);
+        free(args);
+        return rv;
+    }
+
+    /* user-defined */
+    SengFunc *fn = fv->func;
+    if (argc != fn->param_count)
+        fatal("line %d: '%s' expects %d argument(s), got %d", line, fn->name, fn->param_count, argc);
+
+    Env *fenv = env_new(in->globals);
+    if (me_val) env_set(fenv, "me", me_val);
+    for (int i = 0; i < fn->param_count; i++) {
+        Value *av = eval(in, e, arg_nodes->items[i]);
+        env_set(fenv, fn->params[i], av);
+        val_deref(av);
+    }
+
+    NodeList *body = (NodeList *)fn->body_ref;
+    exec_block(in, fenv, body);
+    env_free(fenv);
+
+    Value *rv = in->ret_val ? in->ret_val : val_null();
+    in->ret_val = NULL;
+    in->signal  = SIG_NONE;
+    return rv;
+}
+
 /* ── eval ───────────────────────────────────────────────────── */
 
 static Value *eval(Interp *in, Env *e, Node *n) {
@@ -182,47 +248,39 @@ static Value *eval(Interp *in, Env *e, Node *n) {
             return val_copy(v->list->items[idx]);
         }
 
+        case ND_PROP_GET: {
+            Value *obj = eval(in, e, n->prop_get.obj);
+            if (!obj || obj->type != VAL_INSTANCE)
+                fatal("line %d: expected an instance before 'of'", n->line);
+            int idx = find_field(obj->instance->klass, n->prop_get.name);
+            if (idx < 0) fatal("line %d: instance of '%s' has no field '%s'",
+                               n->line, obj->instance->klass->name, n->prop_get.name);
+            Value *res = val_copy(obj->instance->fields[idx]);
+            val_deref(obj);
+            return res;
+        }
+
+        case ND_ME: {
+            Value *v = env_get(e, "me");
+            if (!v) fatal("line %d: 'me' can only be used inside a blueprint method", n->line);
+            return val_copy(v);
+        }
+
         case ND_CALL_EXPR: {
-            Value *fv = env_get(e, n->call.name);
-            if (!fv || (fv->type != VAL_FUNC && fv->type != VAL_NATIVE))
-                fatal("line %d: '%s' is not a function", n->line, n->call.name);
-
-            /* native (built-in) function */
-            if (fv->type == VAL_NATIVE) {
-                SengNative *nat = fv->native;
-                int argc = n->call.args.count;
-                if (nat->arity >= 0 && argc != nat->arity)
-                    fatal("line %d: '%s' expects %d argument(s), got %d",
-                          n->line, nat->name, nat->arity, argc);
-                Value **args = (Value **)xmalloc(sizeof(Value *) * (size_t)(argc > 0 ? argc : 1));
-                for (int i = 0; i < argc; i++)
-                    args[i] = eval(in, e, n->call.args.items[i]);
-                Value *rv = nat->fn(args, argc);
-                for (int i = 0; i < argc; i++) val_deref(args[i]);
-                free(args);
-                return rv;
+            Value *me_val = NULL;
+            Value *fv = NULL;
+            if (n->call.obj) {
+                me_val = eval(in, e, n->call.obj);
+                if (!me_val || me_val->type != VAL_INSTANCE)
+                    fatal("line %d: expected an instance for method call", n->line);
+                fv = find_method(me_val->instance->klass, n->call.name);
+                if (!fv) fatal("line %d: blueprint '%s' has no method '%s'",
+                               n->line, me_val->instance->klass->name, n->call.name);
+            } else {
+                fv = env_get(e, n->call.name);
             }
-
-            /* user-defined function */
-            SengFunc *fn = fv->func;
-            if (n->call.args.count != fn->param_count)
-                fatal("line %d: '%s' expects %d argument(s), got %d",
-                      n->line, fn->name, fn->param_count, n->call.args.count);
-
-            Env *fenv = env_new(in->globals);
-            for (int i = 0; i < fn->param_count; i++) {
-                Value *av = eval(in, e, n->call.args.items[i]);
-                env_set(fenv, fn->params[i], av);
-                val_deref(av);
-            }
-
-            NodeList *body = (NodeList *)fn->body_ref;
-            exec_block(in, fenv, body);
-            env_free(fenv);
-
-            Value *rv = in->ret_val ? in->ret_val : val_null();
-            in->ret_val = NULL;
-            in->signal  = SIG_NONE;
+            Value *rv = call_func(in, e, fv, &n->call.args, me_val, n->line);
+            if (me_val) val_deref(me_val);
             return rv;
         }
 
@@ -249,6 +307,21 @@ static Signal exec(Interp *in, Env *e, Node *n) {
             Value *v = eval(in, e, n->set.expr);
             env_update(e, n->set.name, v);  /* update existing or create new */
             val_deref(v);
+            return SIG_NONE;
+        }
+
+        case ND_PROP_SET: {
+            Value *obj = eval(in, e, n->prop_set.obj);
+            if (!obj || obj->type != VAL_INSTANCE)
+                fatal("line %d: expected an instance for property set", n->line);
+            int idx = find_field(obj->instance->klass, n->prop_set.name);
+            if (idx < 0) fatal("line %d: instance of '%s' has no field '%s'",
+                               n->line, obj->instance->klass->name, n->prop_set.name);
+            Value *v = eval(in, e, n->prop_set.expr);
+            val_deref(obj->instance->fields[idx]);
+            obj->instance->fields[idx] = val_copy(v);
+            val_deref(v);
+            val_deref(obj);
             return SIG_NONE;
         }
 
@@ -320,61 +393,77 @@ static Signal exec(Interp *in, Env *e, Node *n) {
         }
 
         case ND_DEFINE: {
-            SengFunc *fn = (SengFunc *)xcalloc(1, sizeof(SengFunc));
-            fn->name        = xstrdup(n->define.name);
-            fn->param_count = n->define.param_count;
-            fn->params      = (char **)xmalloc(sizeof(char *) *
-                              (size_t)(fn->param_count ? fn->param_count : 1));
-            for (int i = 0; i < fn->param_count; i++)
-                fn->params[i] = xstrdup(n->define.params[i]);
-            fn->body_ref = &n->define.body;  /* points into AST */
+            SengFunc *fn = make_func(n);
             Value *fv = val_func(fn);
             env_set(e, fn->name, fv);
             val_deref(fv);
             return SIG_NONE;
         }
 
-        case ND_CALL_STMT: {
-            Value *fv = env_get(e, n->call.name);
-            if (!fv || (fv->type != VAL_FUNC && fv->type != VAL_NATIVE))
-                fatal("line %d: '%s' is not a function", n->line, n->call.name);
+        case ND_CLASS: {
+            SengClass *c = (SengClass *)xcalloc(1, sizeof(SengClass));
+            c->name = xstrdup(n->klass.name);
+            c->field_count = n->klass.field_count;
+            c->fields = (char **)xmalloc(sizeof(char *) * (size_t)(c->field_count ? c->field_count : 1));
+            for (int i = 0; i < c->field_count; i++)
+                c->fields[i] = xstrdup(n->klass.fields[i]);
+            
+            c->method_count = n->klass.methods.count;
+            c->methods = xmalloc(sizeof(*c->methods) * (size_t)(c->method_count ? c->method_count : 1));
+            for (int i = 0; i < c->method_count; i++) {
+                Node *mn = n->klass.methods.items[i];
+                SengFunc *fn = make_func(mn);
+                c->methods[i].name = xstrdup(fn->name);
+                c->methods[i].method = val_func(fn);
+            }
+            Value *cv = val_class(c);
+            env_set(e, c->name, cv);
+            val_deref(cv);
+            return SIG_NONE;
+        }
 
-            /* native (built-in) function */
-            if (fv->type == VAL_NATIVE) {
-                SengNative *nat = fv->native;
-                int argc = n->call.args.count;
-                if (nat->arity >= 0 && argc != nat->arity)
-                    fatal("line %d: '%s' expects %d argument(s), got %d",
-                          n->line, nat->name, nat->arity, argc);
-                Value **args = (Value **)xmalloc(sizeof(Value *) * (size_t)(argc > 0 ? argc : 1));
-                for (int i = 0; i < argc; i++)
-                    args[i] = eval(in, e, n->call.args.items[i]);
-                Value *rv = nat->fn(args, argc);
-                for (int i = 0; i < argc; i++) val_deref(args[i]);
-                free(args);
+        case ND_NEW: {
+            Value *cv = env_get(e, n->instantiate.class_name);
+            if (!cv || cv->type != VAL_CLASS)
+                fatal("line %d: '%s' is not a blueprint", n->line, n->instantiate.class_name);
+            SengClass *klass = cv->klass;
+            SengInstance *inst = (SengInstance *)xcalloc(1, sizeof(SengInstance));
+            inst->klass = klass;
+            inst->fields = (Value **)xcalloc((size_t)klass->field_count, sizeof(Value *));
+            for (int i = 0; i < klass->field_count; i++) inst->fields[i] = val_null();
+            Value *iv = val_instance(inst);
+            env_set(e, n->instantiate.instance_name, iv);
+
+            /* call init if exists */
+            Value *init_fn = find_method(klass, "init");
+            if (init_fn) {
+                Value *rv = call_func(in, e, init_fn, &n->instantiate.args, iv, n->line);
                 val_deref(rv);
-                return SIG_NONE;
+            } else if (n->instantiate.args.count > 0) {
+                fatal("line %d: blueprint '%s' has no 'init' method but arguments were provided",
+                      n->line, klass->name);
             }
 
-            /* user-defined function */
-            SengFunc *fn = fv->func;
-            if (n->call.args.count != fn->param_count)
-                fatal("line %d: '%s' expects %d argument(s), got %d",
-                      n->line, fn->name, fn->param_count, n->call.args.count);
+            val_deref(iv);
+            return SIG_NONE;
+        }
 
-            Env *fenv = env_new(in->globals);
-            for (int i = 0; i < fn->param_count; i++) {
-                Value *av = eval(in, e, n->call.args.items[i]);
-                env_set(fenv, fn->params[i], av);
-                val_deref(av);
+        case ND_CALL_STMT: {
+            Value *me_val = NULL;
+            Value *fv = NULL;
+            if (n->call.obj) {
+                me_val = eval(in, e, n->call.obj);
+                if (!me_val || me_val->type != VAL_INSTANCE)
+                    fatal("line %d: expected an instance for method call", n->line);
+                fv = find_method(me_val->instance->klass, n->call.name);
+                if (!fv) fatal("line %d: blueprint '%s' has no method '%s'",
+                               n->line, me_val->instance->klass->name, n->call.name);
+            } else {
+                fv = env_get(e, n->call.name);
             }
-
-            NodeList *body = (NodeList *)fn->body_ref;
-            exec_block(in, fenv, body);
-            env_free(fenv);
-
-            if (in->ret_val) { val_deref(in->ret_val); in->ret_val = NULL; }
-            in->signal = SIG_NONE;
+            Value *rv = call_func(in, e, fv, &n->call.args, me_val, n->line);
+            if (me_val) val_deref(me_val);
+            val_deref(rv);
             return SIG_NONE;
         }
 

@@ -93,16 +93,38 @@ x is greater than or equal to 5
 x is less than or equal to 5
 ```
 
+### Object-Oriented Programming
+```seng
+create blueprint Person
+    has name
+    has age
+
+    define init with n and a             # constructor
+        set name of me to n
+        set age of me to a
+    end
+
+    define greet
+        say "Hello, I am " + name of me
+    end
+end
+
+create instance of Person called p1 with "Alice" and 30
+call greet of p1
+set age of p1 to 31
+say age of p1
+```
+
 ## Key Design Decisions
 
 > [!IMPORTANT]
-> **`times` keyword for multiply**: `n times m` works in expressions. But `repeat N times` uses [parse_primary](file:///c:/Users/kanag/Desktop/seng/src/parser.c#75-158) for N (not a full expression) to avoid the `5 times` ambiguity. Use a variable for computed repeat counts: `set cnt to x times y` then `repeat cnt times`.
+> **Reference Semantics**: Blueprints and instances (as well as lists) use reference semantics. Assigning one instance to another variable does NOT create a copy; both variables point to the same object.
 
 > [!NOTE]
-> **Scoping**: Variables are flat — `while`/`repeat`/`if` bodies share the parent env. [set](file:///c:/Users/kanag/Desktop/seng/src/env.c#45-64) uses [env_update](file:///c:/Users/kanag/Desktop/seng/src/env.c#79-98) which walks up the chain. Functions get their own scope rooted at globals (not the call site).
+> **`me` keyword**: Inside a blueprint method, `me` refers to the current instance. It can be used to access fields or call other methods on the same object.
 
 > [!NOTE]
-> **Reserved words**: `result`, [add](file:///c:/Users/kanag/Desktop/seng/src/compiler.c#36-46), [list](file:///c:/Users/kanag/Desktop/seng/src/value.c#24-30), `item`, `length`, [of](file:///c:/Users/kanag/Desktop/seng/src/interp.c#25-30), `times`, etc. are all keywords and cannot be used as variable/function names.
+> **`init` method**: If a blueprint defines an `init` method, it will be automatically called when an instance is created via `create instance of ... with ...`.
 
 ## .sec Binary Format
 

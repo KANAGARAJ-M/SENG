@@ -1,0 +1,24 @@
+create blueprint Person
+    has name
+    has age
+
+    define init with n and a
+        set name of me to n
+        set age of me to a
+    end
+
+    define greet
+        say "Hello, I am " + name of me + " and I am " + age of me + " years old."
+    end
+
+    define celebrate_birthday
+        set age of me to (age of me + 1)
+        say "Happy birthday! Now I am " + age of me
+    end
+end
+
+create instance of Person called p1 with "Alice" and 30
+
+call greet of p1
+call celebrate_birthday of p1
+call greet of p1

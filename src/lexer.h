@@ -12,13 +12,13 @@ typedef enum {
     TK_IDENT,
 
     /* ── keywords ── */
-    TK_ADD,     TK_AND,    TK_ASK,    TK_BACK,   TK_BY,
-    TK_CALL,    TK_DEFINE, TK_DIVIDED,
+    TK_ADD,     TK_AND,    TK_ASK,    TK_BACK,   TK_BLUEPRINT, TK_BY,
+    TK_CALL,    TK_CALLED, TK_CREATE, TK_DEFINE, TK_DIVIDED,
     TK_ELSE,    TK_END,    TK_EQUAL,
-    TK_FOR,     TK_GIVE,   TK_GREATER,
-    TK_IF,      TK_IMPORT, TK_IS,     TK_ITEM,
+    TK_FOR,     TK_GIVE,   TK_GREATER, TK_HAS,
+    TK_IF,      TK_IMPORT, TK_INSTANCE, TK_IS,     TK_ITEM,
     TK_LENGTH,  TK_LESS,   TK_LIST,
-    TK_MAKE,    TK_MINUS,  TK_MOD,
+    TK_MAKE,    TK_ME,     TK_MINUS,  TK_MOD,
     TK_NOT,     TK_NOTE,
     TK_OF,      TK_OR,     TK_PLUS,
     TK_REPEAT,  TK_RESULT, TK_SAY,    TK_SET,

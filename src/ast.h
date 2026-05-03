@@ -38,6 +38,11 @@ typedef enum {
     ND_CALL_EXPR, /* result of f with args      */
     ND_LIST_GET,  /* item <n> of <list>         */
     ND_LIST_LEN,  /* length of <list>           */
+    ND_CLASS,     /* create blueprint ...       */
+    ND_NEW,       /* create instance of ...     */
+    ND_PROP_GET,  /* <prop> of <obj>            */
+    ND_PROP_SET,  /* set <prop> of <obj> to ... */
+    ND_ME,        /* me keyword                 */
 } NodeKind;
 
 /* ── binary/comparison operator tags ────────────────────────── */
@@ -91,7 +96,7 @@ struct Node {
         } define;
 
         /* ND_CALL_STMT / ND_CALL_EXPR */
-        struct { char *name; NodeList args; } call;
+        struct { char *name; Node *obj; NodeList args; } call;
 
         /* ND_RETURN */           Node *ret;
         /* ND_MAKE_LIST */        char *list_name;
@@ -104,6 +109,34 @@ struct Node {
         /* ND_AND/ND_OR */        struct { Node *left; Node *right; } logical;
         /* ND_LIST_GET */         struct { Node *index; char *name; } list_get;
         /* ND_LIST_LEN */         char *list_len;
+
+        /* ND_CLASS */
+        struct {
+            char     *name;
+            char    **fields;
+            int       field_count;
+            NodeList  methods;
+        } klass;
+
+        /* ND_NEW */
+        struct {
+            char *class_name;
+            char *instance_name;
+            NodeList args;
+        } instantiate;
+
+        /* ND_PROP_GET */
+        struct {
+            char *name;
+            Node *obj;
+        } prop_get;
+
+        /* ND_PROP_SET */
+        struct {
+            char *name;
+            Node *obj;
+            Node *expr;
+        } prop_set;
     };
 };
 

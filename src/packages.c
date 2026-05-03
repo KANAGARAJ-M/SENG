@@ -14,6 +14,8 @@
 #  include <windows.h>
 #  include <wininet.h>
 #  include <direct.h>
+#else
+#  include <unistd.h>
 #endif
 
 /* ── helpers ─────────────────────────────────────────────────── */
@@ -384,7 +386,7 @@ static Value *nat_file_size(Value **a, int n) {
 static Value *nat_dir_exists(Value **a, int n) {
     (void)n; require_str(a[0],1,"dir_exists");
     struct stat st;
-    if (stat(a[0]->str, &st) == 0 && (st.st_mode & S_IFDIR)) return val_bool(1);
+    if (stat(a[0]->str, &st) == 0 && S_ISDIR(st.st_mode)) return val_bool(1);
     return val_bool(0);
 }
 static Value *nat_make_dir(Value **a, int n) {

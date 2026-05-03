@@ -97,6 +97,9 @@ static Node *parse_primary(Parser *p) {
     /* nothing */
     if (tk.type == TK_NOTHING) { p_advance(p); return node_new(ND_NOTHING, ln); }
 
+    /* me */
+    if (tk.type == TK_ME) { p_advance(p); return node_new(ND_ME, ln); }
+
     /* ( expr ) */
     if (tk.type == TK_LPAREN) {
         p_advance(p);
@@ -132,8 +135,13 @@ static Node *parse_primary(Parser *p) {
         p_advance(p);
         p_expect(p, TK_OF);
         Token nm = p_expect(p, TK_IDENT);
+        Node *obj = NULL;
+        if (p_match(p, TK_OF)) {
+            obj = parse_primary(p);
+        }
         Node *n  = node_new(ND_CALL_EXPR, ln);
         n->call.name = nm.value;
+        n->call.obj  = obj;
         if (p_match(p, TK_WITH)) {
             node_list_push(&n->call.args, parse_expr(p));
             while (p_match(p, TK_AND))
@@ -142,11 +150,19 @@ static Node *parse_primary(Parser *p) {
         return n;
     }
 
-    /* identifier */
+    /* identifier [of <obj>] */
     if (tk.type == TK_IDENT) {
         p_advance(p);
+        char *nm = p->cur.value;
+        if (p_match(p, TK_OF)) {
+            Node *obj = parse_primary(p);
+            Node *n   = node_new(ND_PROP_GET, ln);
+            n->prop_get.name = nm;
+            n->prop_get.obj  = obj;
+            return n;
+        }
         Node *n = node_new(ND_IDENT, ln);
-        n->str  = p->cur.value;
+        n->str  = nm;
         return n;
     }
 
@@ -296,13 +312,26 @@ static Node *parse_stmt(Parser *p) {
     /* ── set ── */
     if (tk.type == TK_SET) {
         p_advance(p);
+        /* set <ident> [of <obj>] to <expr> */
         Token nm = p_expect(p, TK_IDENT);
-        p_expect(p, TK_TO);
-        Node *expr = parse_cond(p);
-        eat_newline(p);
-        Node *n = node_new(ND_SET, ln);
-        n->set.name = nm.value; n->set.expr = expr;
-        return n;
+        if (p_match(p, TK_OF)) {
+            Node *obj = parse_primary(p);
+            p_expect(p, TK_TO);
+            Node *expr = parse_cond(p);
+            eat_newline(p);
+            Node *n = node_new(ND_PROP_SET, ln);
+            n->prop_set.name = nm.value;
+            n->prop_set.obj  = obj;
+            n->prop_set.expr = expr;
+            return n;
+        } else {
+            p_expect(p, TK_TO);
+            Node *expr = parse_cond(p);
+            eat_newline(p);
+            Node *n = node_new(ND_SET, ln);
+            n->set.name = nm.value; n->set.expr = expr;
+            return n;
+        }
     }
 
     /* ── say ── */
@@ -433,8 +462,13 @@ static Node *parse_stmt(Parser *p) {
     if (tk.type == TK_CALL) {
         p_advance(p);
         Token nm = p_expect(p, TK_IDENT);
+        Node *obj = NULL;
+        if (p_match(p, TK_OF)) {
+            obj = parse_primary(p);
+        }
         Node *n  = node_new(ND_CALL_STMT, ln);
         n->call.name = nm.value;
+        n->call.obj  = obj;
         if (p_match(p, TK_WITH)) {
             node_list_push(&n->call.args, parse_expr(p));
             while (p_match(p, TK_AND))
@@ -477,6 +511,52 @@ static Node *parse_stmt(Parser *p) {
         n->add_list.val  = val;
         n->add_list.name = nm.value;
         return n;
+    }
+
+    /* ── create ── */
+    if (tk.type == TK_CREATE) {
+        p_advance(p);
+        if (p_match(p, TK_BLUEPRINT)) {
+            Token nm = p_expect(p, TK_IDENT);
+            eat_newline(p);
+            Node *n = node_new(ND_CLASS, ln);
+            n->klass.name = nm.value;
+            skip_newlines(p);
+            while (!p_check(p, TK_END) && !p_check(p, TK_EOF)) {
+                if (p_match(p, TK_HAS)) {
+                    Token f = p_expect(p, TK_IDENT);
+                    n->klass.fields = (char **)xrealloc(n->klass.fields,
+                        sizeof(char *) * (size_t)(n->klass.field_count + 1));
+                    n->klass.fields[n->klass.field_count++] = f.value;
+                    eat_newline(p);
+                } else if (p_check(p, TK_DEFINE)) {
+                    node_list_push(&n->klass.methods, parse_stmt(p));
+                } else if (p_check(p, TK_NEWLINE)) {
+                    p_advance(p);
+                } else {
+                    fatal("line %d: expected 'has' or 'define' in blueprint", p_peek(p).line);
+                }
+                skip_newlines(p);
+            }
+            p_expect(p, TK_END);
+            eat_newline(p);
+            return n;
+        } else if (p_match(p, TK_INSTANCE)) {
+            p_expect(p, TK_OF);
+            Token cls = p_expect(p, TK_IDENT);
+            p_expect(p, TK_CALLED);
+            Token nm = p_expect(p, TK_IDENT);
+            Node *n = node_new(ND_NEW, ln);
+            n->instantiate.class_name = cls.value;
+            n->instantiate.instance_name = nm.value;
+            if (p_match(p, TK_WITH)) {
+                node_list_push(&n->instantiate.args, parse_expr(p));
+                while (p_match(p, TK_AND))
+                    node_list_push(&n->instantiate.args, parse_expr(p));
+            }
+            eat_newline(p);
+            return n;
+        }
     }
 
     /* ── import ── */

@@ -29,6 +29,18 @@ Value *val_list(void) {
     return v;
 }
 
+Value *val_class(SengClass *c) {
+    Value *v = val_alloc(VAL_CLASS);
+    v->klass = c;
+    return v;
+}
+
+Value *val_instance(SengInstance *i) {
+    Value *v = val_alloc(VAL_INSTANCE);
+    v->instance = i;
+    return v;
+}
+
 void val_ref (Value *v) { if (v) v->refcount++; }
 void val_deref(Value *v) {
     if (!v) return;
@@ -38,6 +50,37 @@ void val_deref(Value *v) {
         for (int i = 0; i < v->list->count; i++) val_deref(v->list->items[i]);
         free(v->list->items);
         free(v->list);
+    }
+    if (v->type == VAL_FUNC) {
+        SengFunc *fn = v->func;
+        free(fn->name);
+        for (int i = 0; i < fn->param_count; i++) free(fn->params[i]);
+        free(fn->params);
+        free(fn);
+    }
+    if (v->type == VAL_NATIVE) {
+        /* SengNative structs are usually static/constant in SENG packages, 
+           but if they were dynamic we'd free them here. 
+           Actually, they are pointers to static structs in packages.c. 
+           So we don't free them. */
+    }
+    if (v->type == VAL_CLASS) {
+        SengClass *c = v->klass;
+        free(c->name);
+        for (int i = 0; i < c->field_count; i++) free(c->fields[i]);
+        free(c->fields);
+        for (int i = 0; i < c->method_count; i++) {
+            free(c->methods[i].name);
+            val_deref(c->methods[i].method);
+        }
+        free(c->methods);
+        free(c);
+    }
+    if (v->type == VAL_INSTANCE) {
+        SengInstance *inst = v->instance;
+        for (int i = 0; i < inst->klass->field_count; i++) val_deref(inst->fields[i]);
+        free(inst->fields);
+        free(inst);
     }
     free(v);
 }
@@ -68,6 +111,14 @@ char *val_to_string(const Value *v) {
         }
         case VAL_NATIVE: {
             snprintf(buf, sizeof buf, "<builtin %s>", v->native ? v->native->name : "?");
+            return xstrdup(buf);
+        }
+        case VAL_CLASS: {
+            snprintf(buf, sizeof buf, "<blueprint %s>", v->klass ? v->klass->name : "?");
+            return xstrdup(buf);
+        }
+        case VAL_INSTANCE: {
+            snprintf(buf, sizeof buf, "<instance of %s>", (v->instance && v->instance->klass) ? v->instance->klass->name : "?");
             return xstrdup(buf);
         }
         case VAL_NUM: {
@@ -106,26 +157,6 @@ void val_print(const Value *v) {
 
 Value *val_copy(const Value *src) {
     if (!src) return val_null();
-    switch (src->type) {
-        case VAL_NUM:  return val_num(src->num);
-        case VAL_BOOL: return val_bool(src->bool_val);
-        case VAL_NULL: return val_null();
-        case VAL_STR:  return val_str(src->str);
-        case VAL_FUNC:   { Value *v = val_alloc(VAL_FUNC);   v->func   = src->func;   return v; }
-        case VAL_NATIVE: { Value *v = val_alloc(VAL_NATIVE); v->native = src->native; return v; }
-        case VAL_LIST: {
-            Value *v = val_list();
-            for (int i = 0; i < src->list->count; i++) {
-                Value *item = val_copy(src->list->items[i]);
-                if (v->list->count >= v->list->cap) {
-                    v->list->cap = v->list->cap ? v->list->cap * 2 : 4;
-                    v->list->items = (Value **)xrealloc(v->list->items,
-                        sizeof(Value *) * (size_t)v->list->cap);
-                }
-                v->list->items[v->list->count++] = item;
-            }
-            return v;
-        }
-        default: return val_null();
-    }
+    val_ref((Value *)src);
+    return (Value *)src;
 }

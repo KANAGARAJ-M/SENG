@@ -40,7 +40,7 @@ void node_free(Node *n) {
         case ND_LIST_GET: node_free(n->list_get.index); free(n->list_get.name); break;
         case ND_LIST_LEN: free(n->list_len); break;
         case ND_CALL_STMT: case ND_CALL_EXPR:
-            free(n->call.name); node_list_free(&n->call.args); break;
+            free(n->call.name); node_free(n->call.obj); node_list_free(&n->call.args); break;
         case ND_DEFINE:
             free(n->define.name);
             for (int i = 0; i < n->define.param_count; i++) free(n->define.params[i]);
@@ -54,6 +54,27 @@ void node_free(Node *n) {
                 node_list_free(&n->if_stmt.blocks[i]);
             free(n->if_stmt.blocks);
             break;
+        case ND_CLASS:
+            free(n->klass.name);
+            for (int i = 0; i < n->klass.field_count; i++) free(n->klass.fields[i]);
+            free(n->klass.fields);
+            node_list_free(&n->klass.methods);
+            break;
+        case ND_NEW:
+            free(n->instantiate.class_name);
+            free(n->instantiate.instance_name);
+            node_list_free(&n->instantiate.args);
+            break;
+        case ND_PROP_GET:
+            free(n->prop_get.name);
+            node_free(n->prop_get.obj);
+            break;
+        case ND_PROP_SET:
+            free(n->prop_set.name);
+            node_free(n->prop_set.obj);
+            node_free(n->prop_set.expr);
+            break;
+        case ND_ME: break;
         default: break;
     }
     free(n);

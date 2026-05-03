@@ -4,7 +4,10 @@
 
 #include "common.h"
 
-typedef enum { VAL_NUM, VAL_STR, VAL_BOOL, VAL_NULL, VAL_LIST, VAL_FUNC, VAL_NATIVE } ValType;
+typedef enum { 
+    VAL_NUM, VAL_STR, VAL_BOOL, VAL_NULL, VAL_LIST, VAL_FUNC, VAL_NATIVE,
+    VAL_CLASS, VAL_INSTANCE
+} ValType;
 
 typedef struct Value Value;
 
@@ -31,6 +34,22 @@ typedef struct {
     int     cap;
 } SengList;
 
+typedef struct SengClass {
+    char   *name;
+    char  **fields;
+    int     field_count;
+    struct {
+        char  *name;
+        Value *method;
+    } *methods;
+    int     method_count;
+} SengClass;
+
+typedef struct {
+    SengClass *klass;
+    Value    **fields; /* mapped to klass->fields index */
+} SengInstance;
+
 struct Value {
     ValType type;
     int     refcount;
@@ -41,6 +60,8 @@ struct Value {
         SengList   *list;
         SengFunc   *func;
         SengNative *native;
+        SengClass  *klass;
+        SengInstance *instance;
     };
 };
 
@@ -51,6 +72,8 @@ Value *val_null  (void);
 Value *val_list  (void);
 Value *val_func  (SengFunc *f);
 Value *val_native(SengNative *n);
+Value *val_class (SengClass *c);
+Value *val_instance(SengInstance *i);
 
 void   val_ref  (Value *v);
 void   val_deref(Value *v);
