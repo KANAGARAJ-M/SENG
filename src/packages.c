@@ -647,7 +647,6 @@ static Value *nat_http_get(Value **a, int n) {
     char *body = wininet_request(a[0]->str, "GET", NULL, NULL, 0);
     if (!body) fatal("'http_get': request failed for '%s'", a[0]->str);
     Value *v = val_str(body); free(body); return v;
-    Value *v = val_str(body); free(body); return v;
 #else
     char cmd[2048];
     snprintf(cmd, sizeof cmd, "curl -s \"%s\"", a[0]->str);
@@ -672,7 +671,6 @@ static Value *nat_http_post(Value **a, int n) {
     const char *hdrs = "Content-Type: text/plain\r\n";
     char *resp = wininet_request(a[0]->str, "POST", hdrs, a[1]->str, strlen(a[1]->str));
     if (!resp) fatal("'http_post': request failed for '%s'", a[0]->str);
-    Value *v = val_str(resp); free(resp); return v;
     Value *v = val_str(resp); free(resp); return v;
 #else
     char cmd[4096];
@@ -699,7 +697,6 @@ static Value *nat_http_post_json(Value **a, int n) {
     char *resp = wininet_request(a[0]->str, "POST", hdrs, a[1]->str, strlen(a[1]->str));
     if (!resp) fatal("'http_post_json': request failed for '%s'", a[0]->str);
     Value *v = val_str(resp); free(resp); return v;
-    Value *v = val_str(resp); free(resp); return v;
 #else
     char cmd[4096];
     snprintf(cmd, sizeof cmd, "curl -s -X POST -H 'Content-Type: application/json' -d '%s' \"%s\"", a[1]->str, a[0]->str);
@@ -725,7 +722,6 @@ static Value *nat_http_put(Value **a, int n) {
     char *resp = wininet_request(a[0]->str, "PUT", hdrs, a[1]->str, strlen(a[1]->str));
     if (!resp) fatal("'http_put': request failed for '%s'", a[0]->str);
     Value *v = val_str(resp); free(resp); return v;
-    Value *v = val_str(resp); free(resp); return v;
 #else
     char cmd[4096];
     snprintf(cmd, sizeof cmd, "curl -s -X PUT -d '%s' \"%s\"", a[1]->str, a[0]->str);
@@ -749,7 +745,6 @@ static Value *nat_http_delete(Value **a, int n) {
 #ifdef _WIN32
     char *resp = wininet_request(a[0]->str, "DELETE", NULL, NULL, 0);
     if (!resp) fatal("'http_delete': request failed for '%s'", a[0]->str);
-    Value *v = val_str(resp); free(resp); return v;
     Value *v = val_str(resp); free(resp); return v;
 #else
     char cmd[2048];

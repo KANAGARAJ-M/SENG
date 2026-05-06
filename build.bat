@@ -30,11 +30,12 @@ if %ERRORLEVEL% EQU 0 (
         "%SRC_DIR%\parser.c" ^
         "%SRC_DIR%\value.c"  ^
         "%SRC_DIR%\env.c"    ^
+        "%SRC_DIR%\packages.c" ^
         "%SRC_DIR%\interp.c" ^
         "%SRC_DIR%\compiler.c" ^
         "%SRC_DIR%\vm.c"     ^
         "%SRC_DIR%\main.c"   ^
-        -o "%OUT_EXE%" -lm
+        -o "%OUT_EXE%" -lwininet
     if !ERRORLEVEL! EQU 0 (
         echo  [GCC] Build successful: %OUT_EXE%
         goto :success
@@ -54,11 +55,12 @@ if %ERRORLEVEL% EQU 0 (
         "%SRC_DIR%\parser.c" ^
         "%SRC_DIR%\value.c"  ^
         "%SRC_DIR%\env.c"    ^
+        "%SRC_DIR%\packages.c" ^
         "%SRC_DIR%\interp.c" ^
         "%SRC_DIR%\compiler.c" ^
         "%SRC_DIR%\vm.c"     ^
         "%SRC_DIR%\main.c"   ^
-        -o "%OUT_EXE%" -lm
+        -o "%OUT_EXE%" -lwininet
     if !ERRORLEVEL! EQU 0 (
         echo  [Clang] Build successful: %OUT_EXE%
         goto :success

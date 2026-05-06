@@ -11,6 +11,8 @@
 #ifdef _WIN32
   #include <direct.h>
   #define mkdir(path, mode) _mkdir(path)
+  #include <sys/stat.h>
+  #include <sys/types.h>
 #else
   #include <sys/stat.h>
   #include <sys/types.h>
@@ -61,6 +63,8 @@ static void run_repl(void) {
 /* build output path: store in _secache folder, like python's __pycache__ */
 static char *make_sec_path(const char *src_path) {
     const char *slash = strrchr(src_path, '/');
+    const char *backslash = strrchr(src_path, '\\');
+    if (backslash > slash) slash = backslash;
     char dir[1024] = {0};
     const char *fname = src_path;
 
