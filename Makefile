@@ -1,7 +1,14 @@
 
 CC     = gcc
 CFLAGS = -Wall -Wextra -std=c99 -O2 -Isrc
-LDFLAGS= -lm -lwininet
+
+ifeq ($(OS),Windows_NT)
+    LDFLAGS = -lm -lwininet
+    TARGET  = seng.exe
+else
+    LDFLAGS = -lm
+    TARGET  = seng
+endif
 
 SRC = src/common.c   \
       src/lexer.c    \
@@ -17,7 +24,6 @@ SRC = src/common.c   \
 
 OBJ = $(SRC:.c=.o)
 
-TARGET = seng
 
 .PHONY: all clean test
 
